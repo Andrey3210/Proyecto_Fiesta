@@ -1,0 +1,287 @@
+"use client";
+
+import { useEffect, useRef, useState } from 'react';
+import type { ElementType, MouseEvent as ReactMouseEvent } from 'react';
+import { ArrowRight, Link, Zap } from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+
+export interface TimelineItem {
+  id: number;
+  title: string;
+  date: string;
+  content: string;
+  category: string;
+  icon: ElementType;
+  relatedIds: number[];
+  status: 'completed' | 'in-progress' | 'pending';
+  energy: number;
+}
+
+interface RadialOrbitalTimelineProps {
+  timelineData: TimelineItem[];
+  onItemSelect?: (item: TimelineItem) => void;
+  onNodePress?: (event: ReactMouseEvent<HTMLElement>) => void;
+  activeId?: number | null;
+  title?: string;
+  subtitle?: string;
+}
+
+export default function RadialOrbitalTimeline({
+  timelineData,
+  onItemSelect,
+  onNodePress,
+  activeId = null,
+  title = 'Elige un juego',
+  subtitle = 'Toca un nodo para abrirlo a pantalla completa.',
+}: RadialOrbitalTimelineProps) {
+  const [expandedId, setExpandedId] = useState<number | null>(activeId);
+  const [rotationAngle, setRotationAngle] = useState(0);
+  const [autoRotate, setAutoRotate] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const orbitRef = useRef<HTMLDivElement>(null);
+  const [radius, setRadius] = useState(170);
+
+  useEffect(() => {
+    if (!autoRotate) {
+      return undefined;
+    }
+
+    const interval = window.setInterval(() => {
+      setRotationAngle((current) => (current + 0.12) % 360);
+    }, 24);
+
+    return () => window.clearInterval(interval);
+  }, [autoRotate]);
+
+  const handleBackgroundClick = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (event.target === containerRef.current || event.target === orbitRef.current) {
+      setExpandedId(null);
+      setAutoRotate(true);
+    }
+  };
+
+  useEffect(() => {
+    const updateRadius = () => {
+      setRadius(window.innerWidth < 640 ? 122 : 190);
+    };
+
+    updateRadius();
+    window.addEventListener('resize', updateRadius);
+
+    return () => window.removeEventListener('resize', updateRadius);
+  }, []);
+
+  const calculateNodePosition = (index: number, total: number) => {
+    const angle = ((index / total) * 360 + rotationAngle) % 360;
+    const radian = (angle * Math.PI) / 180;
+    const x = radius * Math.cos(radian);
+    const y = radius * Math.sin(radian);
+    const zIndex = Math.round(100 + 50 * Math.cos(radian));
+    const opacity = Math.max(0.45, 0.55 + 0.45 * ((1 + Math.sin(radian)) / 2));
+
+    return { x, y, zIndex, opacity };
+  };
+
+  const getStatusStyles = (status: TimelineItem['status']) => {
+    switch (status) {
+      case 'completed':
+        return 'border-emerald-400/50 bg-emerald-500/15 text-emerald-100';
+      case 'in-progress':
+        return 'border-cyan-400/50 bg-cyan-500/15 text-cyan-100';
+      default:
+        return 'border-white/20 bg-white/5 text-white/70';
+    }
+  };
+
+  const activeItem = expandedId
+    ? timelineData.find((item) => item.id === expandedId) ?? null
+    : null;
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4 py-10 pt-24 text-white app-fade-up"
+      onClick={handleBackgroundClick}
+    >
+      <div className="absolute inset-0 bg-black/35" />
+
+      <div className="relative z-10 w-full max-w-6xl">
+        <div className="mb-8 text-center">
+          <p className="mb-3 text-xs uppercase tracking-[0.5em] text-white/60">
+            MondeFan
+          </p>
+          <h1 className="text-4xl font-black sm:text-5xl">{title}</h1>
+          <p className="mt-3 text-sm text-slate-200 sm:text-base">{subtitle}</p>
+        </div>
+
+        <div className="relative flex min-h-[540px] items-center justify-center">
+          <div
+            ref={orbitRef}
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ transform: 'translate(0px, 0px)' }}
+          >
+            <div className="absolute h-24 w-24 rounded-full bg-gradient-to-br from-fuchsia-500 via-indigo-500 to-cyan-400 opacity-90 shadow-[0_0_70px_rgba(255,255,255,0.25)]" />
+            <div className="absolute h-36 w-36 rounded-full border border-white/10" />
+            <div className="absolute h-64 w-64 rounded-full border border-white/10" />
+            <div className="absolute h-[22rem] w-[22rem] rounded-full border border-white/10" />
+
+            {timelineData.map((item, index) => {
+              const position = calculateNodePosition(index, timelineData.length);
+              const isExpanded = expandedId === item.id;
+              const Icon = item.icon;
+
+              return (
+                <div
+                  key={item.id}
+                  className={cn(
+                    'absolute cursor-pointer transition-transform duration-300',
+                    isExpanded ? 'scale-110' : 'hover:scale-105',
+                  )}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Abrir ${item.title}`}
+                  style={{
+                    transform: `translate(${position.x}px, ${position.y}px)`,
+                    zIndex: isExpanded ? 200 : position.zIndex,
+                    opacity: isExpanded ? 1 : position.opacity,
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onNodePress?.(event);
+                    setExpandedId(item.id);
+                    setAutoRotate(false);
+                    onItemSelect?.(item);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setExpandedId(item.id);
+                      setAutoRotate(false);
+                      onItemSelect?.(item);
+                    }
+                  }}
+                >
+                  <div
+                    className={cn(
+                      'absolute -inset-4 rounded-full blur-2xl transition-opacity duration-300',
+                      isExpanded ? 'opacity-100' : 'opacity-60',
+                    )}
+                    style={{
+                      background: `radial-gradient(circle, ${item.category === 'Ruleta' ? 'rgba(236,72,153,0.45)' : item.category === 'Verdad o Shot' ? 'rgba(59,130,246,0.45)' : 'rgba(34,197,94,0.35)'} 0%, rgba(0,0,0,0) 72%)`,
+                    }}
+                  />
+
+                  <div
+                    className={cn(
+                      'relative flex h-14 w-14 items-center justify-center rounded-full border-2 backdrop-blur-xl transition-all duration-300',
+                      isExpanded
+                        ? 'border-white bg-white text-slate-950 shadow-[0_0_30px_rgba(255,255,255,0.35)]'
+                        : 'border-white/25 bg-black/65 text-white',
+                    )}
+                  >
+                    <Icon size={20} />
+                  </div>
+
+                  <div
+                    className={cn(
+                      'absolute left-1/2 top-16 -translate-x-1/2 whitespace-nowrap text-sm font-semibold transition-all duration-300',
+                      isExpanded ? 'scale-110 text-white' : 'text-white/75',
+                    )}
+                  >
+                    {item.title}
+                  </div>
+
+                  {isExpanded && (
+                    <Card className="absolute left-1/2 top-24 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 border-white/10 bg-slate-950/90 shadow-2xl shadow-black/40 backdrop-blur-2xl">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <Badge className={cn('border', getStatusStyles(item.status))}>
+                            {item.status === 'completed'
+                              ? 'LISTO'
+                              : item.status === 'in-progress'
+                                ? 'ACTIVO'
+                                : 'PRONTO'}
+                          </Badge>
+                          <span className="text-xs font-mono text-white/50">{item.date}</span>
+                        </div>
+                        <CardTitle className="mt-2 text-xl">{item.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4 text-sm text-white/80">
+                        <p>{item.content}</p>
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                          <div className="mb-2 flex items-center justify-between text-xs text-white/70">
+                            <span className="flex items-center gap-1">
+                              <Zap size={12} />
+                              Energía
+                            </span>
+                            <span>{item.energy}%</span>
+                          </div>
+                          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 via-cyan-400 to-emerald-400"
+                              style={{ width: `${item.energy}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        {item.relatedIds.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-1 text-xs uppercase tracking-[0.3em] text-white/60">
+                              <Link size={12} />
+                              Relacionado
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {item.relatedIds.map((relatedId) => {
+                                const relatedItem = timelineData.find((entry) => entry.id === relatedId);
+
+                                if (!relatedItem) {
+                                  return null;
+                                }
+
+                                return (
+                                  <Button
+                                    key={relatedId}
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 rounded-full border-white/15 bg-white/5 px-3 text-xs text-white hover:bg-white/10"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      setExpandedId(relatedItem.id);
+                                      onItemSelect?.(relatedItem);
+                                    }}
+                                  >
+                                    {relatedItem.title}
+                                    <ArrowRight size={12} className="ml-1" />
+                                  </Button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {activeItem && (
+            <div className="pointer-events-none absolute inset-x-4 bottom-4 flex justify-center">
+              <div className="pointer-events-auto w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/70 px-5 py-4 text-center shadow-2xl backdrop-blur-2xl">
+                <p className="text-xs uppercase tracking-[0.35em] text-white/50">Seleccionado</p>
+                <p className="mt-2 text-lg font-semibold text-white">{activeItem.title}</p>
+                <p className="mt-1 text-sm text-white/70">{activeItem.content}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

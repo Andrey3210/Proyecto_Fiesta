@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    background: #050816;
+    color: white;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  @keyframes moveBackground {
+    from {
+      background-position: 0% 0%;
+    }
+
+    to {
+      background-position: 0% -1000%;
+    }
+  }
+}
+
+@layer utilities {
+  @keyframes app-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes app-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes app-stage-in {
+    from {
+      transform: translateY(24px) scale(0.985);
+    }
+
+    to {
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .app-fade-up {
+    animation: app-fade-up 700ms ease both;
+  }
+
+  .app-fade-up-delay {
+    animation: app-fade-up 700ms ease 120ms both;
+  }
+
+  .app-float {
+    animation: app-float 6s ease-in-out infinite;
+  }
+
+  .app-stage-in {
+    animation: app-stage-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
