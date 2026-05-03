@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import GameHub from './components/GameHub';
+import ImpostorGame from './components/ImpostorGame';
 import Roulette from './components/Roulette';
 import WelcomeScreen from './components/WelcomeScreen';
 import TruthOrDareGame from './components/TruthOrDareGame';
@@ -20,7 +21,7 @@ export type Participant = {
 };
 
 type Stage = 'welcome' | 'hub' | 'game';
-type GameMode = 'roulette' | 'truth';
+type GameMode = 'roulette' | 'truth' | 'impostor';
 
 type ButtonPulse = {
   x: number;
@@ -142,7 +143,7 @@ function App() {
             scanlineDensity: 1160,
             scanlineOpacity: 0.16,
           }
-        : gameMode === 'roulette'
+      : gameMode === 'roulette'
         ? {
             baseColor: '#ff4bbf',
             speed: 1.35,
@@ -150,6 +151,15 @@ function App() {
             rgbShift: 0.028,
             scanlineDensity: 900,
             scanlineOpacity: 0.22,
+          }
+        : gameMode === 'impostor'
+        ? {
+            baseColor: '#46f2b1',
+            speed: 1.08,
+            glitchIntensity: 0.62,
+            rgbShift: 0.02,
+            scanlineDensity: 1080,
+            scanlineOpacity: 0.18,
           }
         : {
             baseColor: '#8bffcf',
@@ -250,8 +260,14 @@ function App() {
             onButtonPress={triggerButtonPulse}
             onBackToHub={() => setPendingExit('hub')}
           />
-        ) : (
+        ) : gameMode === 'truth' ? (
           <TruthOrDareGame
+            participants={participants}
+            onButtonPress={triggerButtonPulse}
+            onBackToHub={() => setPendingExit('hub')}
+          />
+        ) : (
+          <ImpostorGame
             participants={participants}
             onButtonPress={triggerButtonPulse}
             onBackToHub={() => setPendingExit('hub')}

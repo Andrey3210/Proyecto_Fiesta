@@ -1,4 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
+import { FaMask } from 'react-icons/fa';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 
 import RadialOrbitalTimeline, {
@@ -7,7 +8,7 @@ import RadialOrbitalTimeline, {
 
 import type { Participant } from '../App';
 
-type GameMode = 'roulette' | 'truth';
+type GameMode = 'roulette' | 'truth' | 'impostor';
 
 type GameHubProps = {
   participants: Participant[];
@@ -24,7 +25,7 @@ const timelineData: TimelineItem[] = [
     content: 'Una ruleta real para elegir a alguien al azar y empezar la fiesta.',
     category: 'Ruleta',
     icon: () => <span className="text-xl">🎡</span>,
-    relatedIds: [2],
+    relatedIds: [2, 3],
     status: 'completed',
     energy: 95,
   },
@@ -35,20 +36,20 @@ const timelineData: TimelineItem[] = [
     content: 'Turnos en orden con preguntas claras y shots si toca.',
     category: 'Verdad o Shot',
     icon: () => <span className="text-xl">🍻</span>,
-    relatedIds: [1],
+    relatedIds: [1, 3],
     status: 'in-progress',
     energy: 88,
   },
   {
     id: 3,
-    title: 'Próximos juegos',
-    date: 'Muy pronto',
-    content: 'Dejamos espacio para nuevos juegos de fiesta que se sumarán luego.',
-    category: 'Próximos',
-    icon: () => <span className="text-xl">✨</span>,
+    title: 'Impostor',
+    date: 'Jugar ahora',
+    content: 'Bolsa secreta, pistas opcionales y un impostor tratando de pasar desapercibido.',
+    category: 'Impostor',
+    icon: FaMask,
     relatedIds: [1, 2],
-    status: 'pending',
-    energy: 42,
+    status: 'completed',
+    energy: 92,
   },
 ];
 
@@ -88,6 +89,10 @@ function GameHub({
 
           if (item.id === 2) {
             onSelectGame('truth');
+          }
+
+          if (item.id === 3) {
+            onSelectGame('impostor');
           }
         }}
         onNodePress={onButtonPress}
