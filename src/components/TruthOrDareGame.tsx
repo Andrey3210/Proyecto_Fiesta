@@ -83,6 +83,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
   const [currentTruth, setCurrentTruth] = useState('');
   const [shotSecondsLeft, setShotSecondsLeft] = useState(shotDuration);
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<TruthCategoryKey | null>(null);
+  const [showCategoryChangeWarning, setShowCategoryChangeWarning] = useState(false);
   const [truthDeck, setTruthDeck] = useState<string[]>([]);
   const [truthDeckIndex, setTruthDeckIndex] = useState(0);
   const turnPanelRef = useRef<HTMLDivElement | null>(null);
@@ -393,17 +394,9 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
               <LiquidButton
                 className="rounded-full !px-4 !py-2 text-sm"
                 onClick={(event) => {
-                  onButtonPress(event);
-                  const shouldChange = window.confirm(
-                    'Cambiar de categoría reiniciará la ronda actual. ¿Quieres continuar?',
-                  );
-
-                  if (!shouldChange) {
-                    return;
-                  }
-
-                  setSelectedCategoryKey(null);
-                }}
+                    onButtonPress(event);
+                    setShowCategoryChangeWarning(true);
+                  }}
                 size="lg"
                 variant="cool"
                 type="button"
@@ -567,6 +560,39 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
           </section>
         </div>
       </div>
+
+      {showCategoryChangeWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
+            <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
+            <h2 className="mt-3 text-2xl font-black">Cambiar categoría</h2>
+            <p className="mt-3 text-slate-200">Si cambias la categoría, la ronda actual se reiniciará.</p>
+            <div className="mt-6 flex gap-3">
+              <button
+                className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                onClick={() => setShowCategoryChangeWarning(false)}
+                type="button"
+              >
+                Seguir jugando
+              </button>
+              <button
+                className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                onClick={() => {
+                  setShowCategoryChangeWarning(false);
+                  setSelectedCategoryKey(null);
+                  window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth',
+                  });
+                }}
+                type="button"
+              >
+                Cambiar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

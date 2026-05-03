@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   FaArrowLeft,
-  FaChevronRight,
+  FaClock,
   FaEye,
   FaEyeSlash,
-  FaHandPaper,
   FaMask,
   FaRedoAlt,
+  FaUsers,
 } from 'react-icons/fa';
-import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
 
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import { ParticipantAvatarBadge } from '@/components/ui/participant-avatar';
@@ -27,7 +27,12 @@ type ImpostorGameProps = {
   onButtonPress: (event: ReactMouseEvent<HTMLElement>) => void;
 };
 
-type Phase = 'setup' | 'reveal' | 'summary';
+type Phase = 'setup' | 'reveal' | 'round' | 'vote' | 'summary';
+type RevealStep = 'covered' | 'shown';
+type VoteResult = 'impostor-wins' | 'group-wins' | null;
+type PendingCategoryChange =
+  | { kind: 'clear' }
+  | { kind: 'switch'; nextKey: ImpostorCategoryKey };
 
 const shuffleList = <T,>(values: readonly T[]) => {
   const order = [...values];
@@ -40,72 +45,104 @@ const shuffleList = <T,>(values: readonly T[]) => {
   return order;
 };
 
-const holdDuration = 900;
+const roundDuration = 45;
 
 function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGameProps) {
   const participantSignature = participants.map((participant) => participant.id).join('|');
   const [phase, setPhase] = useState<Phase>('setup');
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<ImpostorCategoryKey | null>(null);
+  const [pendingCategoryChange, setPendingCategoryChange] = useState<PendingCategoryChange | null>(
+    null,
+  );
   const [showHint, setShowHint] = useState(true);
   const [turnOrder, setTurnOrder] = useState<string[]>([]);
   const [currentTurnIndex, setCurrentTurnIndex] = useState(0);
   const [impostorId, setImpostorId] = useState<string | null>(null);
   const [secretItem, setSecretItem] = useState<ImpostorSecret | null>(null);
-  const [bagOpen, setBagOpen] = useState(false);
-  const [readyToContinue, setReadyToContinue] = useState(false);
-  const [isHolding, setIsHolding] = useState(false);
-  const [holdProgress, setHoldProgress] = useState(0);
+  const [revealStep, setRevealStep] = useState<RevealStep>('covered');
+  const [roundIndex, setRoundIndex] = useState(1);
+  const [roundSecondsLeft, setRoundSecondsLeft] = useState(roundDuration);
+  const [selectedVoteId, setSelectedVoteId] = useState<string | null>(null);
+  const [voteResult, setVoteResult] = useState<VoteResult>(null);
+  const [votedPlayerId, setVotedPlayerId] = useState<string | null>(null);
   const resultPanelRef = useRef<HTMLDivElement | null>(null);
-  const holdStartRef = useRef<number | null>(null);
-  const holdFrameRef = useRef<number | null>(null);
 
   const selectedCategory = selectedCategoryKey ? impostorCategoryMap[selectedCategoryKey] : null;
   const currentPlayer = participants.find((participant) => participant.id === turnOrder[currentTurnIndex]);
   const impostorPlayer = impostorId
     ? participants.find((participant) => participant.id === impostorId)
     : null;
+  const votedPlayer = votedPlayerId
+    ? participants.find((participant) => participant.id === votedPlayerId)
+    : null;
   const isCurrentImpostor = currentPlayer?.id === impostorId;
-  const canStart = participants.length >= 3 && selectedCategory !== null;
+  const canStartMatch = participants.length >= 3 && selectedCategory !== null;
+  const roundFinished = phase === 'round' && roundSecondsLeft === 0;
+  const activeVotePlayer = selectedVoteId
+    ? participants.find((participant) => participant.id === selectedVoteId)
+    : null;
 
-  const resetHoldState = () => {
-    if (holdFrameRef.current !== null) {
-      window.cancelAnimationFrame(holdFrameRef.current);
-      holdFrameRef.current = null;
-    }
-
-    holdStartRef.current = null;
-    setIsHolding(false);
-    setHoldProgress(0);
-  };
-
-  const resetRoundState = () => {
+  const resetMatchState = () => {
     setPhase('setup');
     setTurnOrder([]);
     setCurrentTurnIndex(0);
     setImpostorId(null);
     setSecretItem(null);
-    setBagOpen(false);
-    setReadyToContinue(false);
-    resetHoldState();
+    setRevealStep('covered');
+    setRoundIndex(1);
+    setRoundSecondsLeft(roundDuration);
+    setSelectedVoteId(null);
+    setVoteResult(null);
+    setVotedPlayerId(null);
   };
 
-  const confirmCategoryChange = () =>
-    window.confirm('Cambiar de categoría reiniciará la configuración actual. ¿Quieres continuar?');
-
-  useEffect(() => {
-    if (participants.length === 0) {
-      resetRoundState();
+  const commitPendingCategoryChange = () => {
+    if (!pendingCategoryChange) {
       return;
     }
 
-    if (phase !== 'setup' && participantSignature) {
-      resetRoundState();
+    setPendingCategoryChange(null);
+
+    if (pendingCategoryChange.kind === 'switch') {
+      setSelectedCategoryKey(pendingCategoryChange.nextKey);
+    } else {
+      setSelectedCategoryKey(null);
+    }
+
+    resetMatchState();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  useEffect(() => {
+    if (participants.length === 0) {
+      resetMatchState();
+      setSelectedCategoryKey(null);
+      return;
+    }
+
+    if (participantSignature && phase !== 'setup') {
+      resetMatchState();
     }
   }, [participantSignature]);
 
   useEffect(() => {
-    if (phase === 'setup') {
+    if (phase !== 'round' || roundSecondsLeft === 0) {
       return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setRoundSecondsLeft((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [phase, roundSecondsLeft]);
+
+  useEffect(() => {
+    if (phase === 'setup') {
+      return;
     }
 
     const timer = window.setTimeout(() => {
@@ -116,18 +153,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
     }, 120);
 
     return () => window.clearTimeout(timer);
-  }, [phase, currentTurnIndex, readyToContinue, bagOpen]);
+  }, [phase, currentTurnIndex, roundIndex, roundSecondsLeft]);
 
-  useEffect(
-    () => () => {
-      if (holdFrameRef.current !== null) {
-        window.cancelAnimationFrame(holdFrameRef.current);
-      }
-    },
-    [],
-  );
-
-  const startRound = () => {
+  const startMatch = () => {
     if (!selectedCategory || participants.length < 3) {
       return;
     }
@@ -145,79 +173,66 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
     setCurrentTurnIndex(0);
     setImpostorId(shuffledParticipants[impostorIndex] ?? null);
     setSecretItem(pickedSecret);
-    setBagOpen(false);
-    setReadyToContinue(false);
-    resetHoldState();
+    setRevealStep('covered');
+    setRoundIndex(1);
+    setRoundSecondsLeft(roundDuration);
+    setSelectedVoteId(null);
+    setVoteResult(null);
+    setVotedPlayerId(null);
     setPhase('reveal');
   };
 
-  const revealBag = () => {
-    if (bagOpen) {
+  const handleRevealAction = () => {
+    if (revealStep === 'covered') {
+      setRevealStep('shown');
       return;
     }
 
-    resetHoldState();
-    setHoldProgress(1);
-    setBagOpen(true);
-    setReadyToContinue(false);
+    const nextIndex = currentTurnIndex + 1;
+
+    if (nextIndex < turnOrder.length) {
+      setCurrentTurnIndex(nextIndex);
+      setRevealStep('covered');
+      return;
+    }
+
+    setPhase('round');
+    setRoundSecondsLeft(roundDuration);
+    setRevealStep('covered');
   };
 
-  const handleHoldStart = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (phase !== 'reveal' || bagOpen || readyToContinue || isHolding) {
+  const handleContinueRound = () => {
+    if (!roundFinished) {
       return;
     }
 
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    holdStartRef.current = window.performance.now();
-    setIsHolding(true);
-
-    const tick = (timestamp: number) => {
-      if (holdStartRef.current === null) {
-        return;
-      }
-
-      const progress = Math.min(1, (timestamp - holdStartRef.current) / holdDuration);
-      setHoldProgress(progress);
-
-      if (progress >= 1) {
-        revealBag();
-        return;
-      }
-
-      holdFrameRef.current = window.requestAnimationFrame(tick);
-    };
-
-    holdFrameRef.current = window.requestAnimationFrame(tick);
+    setRoundIndex((value) => value + 1);
+    setRoundSecondsLeft(roundDuration);
   };
 
-  const handleHoldEnd = () => {
-    if (bagOpen) {
-      setBagOpen(false);
-      setReadyToContinue(true);
-      resetHoldState();
+  const handleGoToVote = () => {
+    if (!roundFinished) {
       return;
     }
 
-    resetHoldState();
+    setSelectedVoteId(null);
+    setPhase('vote');
   };
 
-  const handleNextPlayer = (event: ReactMouseEvent<HTMLElement>) => {
-    onButtonPress(event);
-
-    if (currentTurnIndex + 1 < turnOrder.length) {
-      setCurrentTurnIndex((index) => index + 1);
-      setBagOpen(false);
-      setReadyToContinue(false);
-      resetHoldState();
+  const handleVoteConfirm = () => {
+    if (!selectedVoteId || !impostorId) {
       return;
     }
 
+    const impostorWasSelected = selectedVoteId === impostorId;
+    setVoteResult(impostorWasSelected ? 'group-wins' : 'impostor-wins');
+    setVotedPlayerId(selectedVoteId);
     setPhase('summary');
   };
 
   const selectedColor = selectedCategory?.accent ?? '#38bdf8';
   const selectedPanel = selectedCategory?.panel ?? 'from-sky-500/20 via-cyan-500/14 to-indigo-500/10';
+  const roundProgressWidth = `${Math.max(0, (roundSecondsLeft / roundDuration) * 100)}%`;
 
   if (phase === 'setup') {
     return (
@@ -247,8 +262,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
               <h1 className="mt-2 text-4xl font-black sm:text-5xl">Impostor</h1>
               <p className="mt-3 max-w-2xl text-slate-200">
-                Elige una categoría, activa o desactiva la pista y luego cada jugador abre su bolsa
-                manteniendo presionado.
+                Elige una categoria, reparte los roles uno por uno y luego empieza la ronda con
+                tiempo limite. Cuando termine, votan por una persona.
               </p>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -259,11 +274,13 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     onClick={(event) => {
                       onButtonPress(event);
 
-                      if (!confirmCategoryChange()) {
+                      if (selectedCategoryKey && selectedCategoryKey !== category.key) {
+                        setPendingCategoryChange({ kind: 'switch', nextKey: category.key });
                         return;
                       }
 
                       setSelectedCategoryKey(category.key);
+                      resetMatchState();
                     }}
                     type="button"
                   >
@@ -307,7 +324,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     boxShadow: selectedCategory ? `0 0 0 1px ${selectedColor}22` : undefined,
                   }}
                 >
-                  <p className="text-sm uppercase tracking-[0.35em] text-white/50">Categoría</p>
+                  <p className="text-sm uppercase tracking-[0.35em] text-white/50">Categoria</p>
                   {selectedCategory ? (
                     <>
                       <p className="mt-2 text-2xl font-black" style={{ color: selectedColor }}>
@@ -320,7 +337,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     </>
                   ) : (
                     <>
-                      <p className="mt-2 text-2xl font-black text-white">Sin categoría aún</p>
+                      <p className="mt-2 text-2xl font-black text-white">Sin categoria aun</p>
                       <p className="mt-2 text-slate-200">
                         Selecciona una de las tarjetas de arriba para preparar la partida.
                       </p>
@@ -349,7 +366,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     <span className="mt-2 block text-sm text-slate-200">
                       {showHint
                         ? 'Activa para que el impostor vea una pista extra.'
-                        : 'Desactivada para jugar más difícil.'}
+                        : 'Desactivada para jugar mas dificil.'}
                     </span>
                   </button>
 
@@ -358,17 +375,15 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     <p className="mt-2 text-sm text-slate-200">
                       {participants.length} participantes listos.
                     </p>
-                    <p className="mt-1 text-xs text-slate-400">
-                      Necesitas al menos 3 para empezar.
-                    </p>
+                    <p className="mt-1 text-xs text-slate-400">Necesitas al menos 3 para empezar.</p>
                   </div>
 
                   <LiquidButton
                     className="mt-5 w-full"
-                    disabled={!canStart}
+                    disabled={!canStartMatch}
                     onClick={(event) => {
                       onButtonPress(event);
-                      startRound();
+                      startMatch();
                     }}
                     size="xxl"
                     variant="cool"
@@ -376,7 +391,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   >
                     <span className="flex items-center gap-2">
                       <FaMask />
-                      Empezar ronda
+                      Repartir roles
                     </span>
                   </LiquidButton>
                 </div>
@@ -389,6 +404,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   }
 
   if (phase === 'summary') {
+    const resultTitle =
+      voteResult === 'group-wins' ? 'Ganaron los demas' : 'Gano el impostor';
+
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
         <div className="fixed left-4 top-4 z-50">
@@ -409,14 +427,14 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           </LiquidButton>
         </div>
 
-        <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
             <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
               <h1 className="mt-2 text-4xl font-black sm:text-5xl">Ronda terminada</h1>
               <p className="mt-3 text-slate-200">
-                La categoría era <span className="font-semibold">{selectedCategory?.label ?? 'Categoría'}</span>.
+                La categoria era <span className="font-semibold">{selectedCategory?.label ?? 'Categoria'}</span>.
               </p>
 
               <div
@@ -425,17 +443,15 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   boxShadow: `0 0 0 1px ${selectedColor}22`,
                 }}
               >
-                <p className="text-sm uppercase tracking-[0.35em] text-white/50">
-                  La palabra secreta
-                </p>
+                <p className="text-sm uppercase tracking-[0.35em] text-white/50">Resultado</p>
                 <p className="mt-3 text-3xl font-black" style={{ color: selectedColor }}>
-                  {secretItem?.answer}
+                  {resultTitle}
                 </p>
-                {showHint && secretItem && (
-                  <p className="mt-3 text-slate-200">
-                    Pista del impostor: <span className="font-semibold">{secretItem.clue}</span>
-                  </p>
-                )}
+                <p className="mt-3 text-slate-200">
+                  {voteResult === 'group-wins'
+                    ? 'El voto dio con el impostor. Ganaron todos los demas.'
+                    : 'El voto fallo. El impostor se queda con la ronda.'}
+                </p>
               </div>
 
               <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
@@ -445,19 +461,19 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                 </p>
               </div>
 
+              <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
+                <p className="text-sm uppercase tracking-[0.35em] text-white/50">Voto final</p>
+                <p className="mt-2 text-2xl font-black" style={{ color: '#38bdf8' }}>
+                  {votedPlayer?.name ?? 'Sin voto'}
+                </p>
+              </div>
+
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <LiquidButton
                   className="w-full"
                   onClick={(event) => {
                     onButtonPress(event);
-                    setPhase('setup');
-                    setTurnOrder([]);
-                    setCurrentTurnIndex(0);
-                    setImpostorId(null);
-                    setSecretItem(null);
-                    setBagOpen(false);
-                    setReadyToContinue(false);
-                    resetHoldState();
+                    startMatch();
                   }}
                   size="xxl"
                   variant="cool"
@@ -472,19 +488,13 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   className="w-full"
                   onClick={(event) => {
                     onButtonPress(event);
-
-                    if (!confirmCategoryChange()) {
-                      return;
-                    }
-
-                    setSelectedCategoryKey(null);
-                    resetRoundState();
+                    setPendingCategoryChange({ kind: 'clear' });
                   }}
                   size="xxl"
                   variant="cool"
                   type="button"
                 >
-                  Elegir categoría
+                  Elegir categoria
                 </LiquidButton>
               </div>
             </section>
@@ -494,6 +504,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 {participants.slice(0, 6).map((participant) => {
                   const isImpostor = participant.id === impostorId;
+                  const isVoted = participant.id === votedPlayerId;
 
                   return (
                     <div
@@ -514,6 +525,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                       <p className="mt-1 text-sm text-slate-300">
                         {isImpostor ? 'Impostor de la ronda' : 'Jugador normal'}
                       </p>
+                      {isVoted && (
+                        <p className="mt-2 text-sm font-semibold text-sky-200">Votado por el grupo</p>
+                      )}
                     </div>
                   );
                 })}
@@ -524,6 +538,34 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
             </section>
           </div>
         </div>
+
+        {pendingCategoryChange && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
+              <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
+              <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+              <p className="mt-3 text-slate-200">
+                Si cambias la categoria, se reiniciara la partida actual.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                  onClick={() => setPendingCategoryChange(null)}
+                  type="button"
+                >
+                  Seguir jugando
+                </button>
+                <button
+                  className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                  onClick={commitPendingCategoryChange}
+                  type="button"
+                >
+                  Cambiar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -551,11 +593,620 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
     );
   }
 
+  if (phase === 'reveal') {
+    return (
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
+        <div className="fixed left-4 top-4 z-50">
+          <LiquidButton
+            className="rounded-full"
+            onClick={(event) => {
+              onButtonPress(event);
+              onBackToHub();
+            }}
+            size="lg"
+            variant="cool"
+            type="button"
+          >
+            <span className="flex items-center gap-2">
+              <FaArrowLeft />
+              Volver
+            </span>
+          </LiquidButton>
+        </div>
+
+        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
+          <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+              <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
+              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Impostor</h1>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <LiquidButton
+                  className="rounded-full !px-4 !py-2 text-sm"
+                  onClick={(event) => {
+                    onButtonPress(event);
+                    setPendingCategoryChange({ kind: 'clear' });
+                  }}
+                  size="lg"
+                  variant="cool"
+                  type="button"
+                >
+                  Cambiar categoria
+                </LiquidButton>
+                <div
+                  className="rounded-full border px-4 py-2 text-sm text-white/80"
+                  style={{
+                    borderColor: `${selectedColor}55`,
+                    backgroundColor: `${selectedColor}12`,
+                  }}
+                >
+                  {selectedCategory?.label ?? 'Sin categoria'}
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-5">
+                <p className="text-sm uppercase tracking-[0.35em] text-white/50">Turno</p>
+                <div className="mt-3 flex items-center gap-4">
+                  <ParticipantAvatarBadge
+                    avatar={currentPlayer.avatar}
+                    backgroundColor={currentPlayer.color}
+                    seed={currentPlayer.avatarSeed}
+                    alt={currentPlayer.name}
+                    sizeClassName="h-16 w-16"
+                  />
+                  <div>
+                    <p className="text-3xl font-black" style={{ color: currentPlayer.color }}>
+                      {currentPlayer.name}
+                    </p>
+                    <p className="mt-1 text-slate-200">
+                      Mira tu papel y pulsa siguiente para pasar al siguiente jugador.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <button
+                  className={`rounded-[1.5rem] border px-4 py-4 text-left transition ${
+                    showHint
+                      ? 'border-emerald-400/40 bg-emerald-500/10 text-white'
+                      : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'
+                  }`}
+                  onClick={(event) => {
+                    onButtonPress(event);
+                    setShowHint((value) => !value);
+                  }}
+                  type="button"
+                >
+                  <span className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.3em]">
+                    {showHint ? <FaEye /> : <FaEyeSlash />}
+                    Pista
+                  </span>
+                  <span className="mt-2 block text-sm text-slate-200">
+                    {showHint
+                      ? 'Activa para mostrar una pista solo al impostor.'
+                      : 'Desactivada para jugar mas dificil.'}
+                  </span>
+                </button>
+
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
+                  <p className="text-sm uppercase tracking-[0.3em] text-white/50">Revelacion</p>
+                  <p className="mt-2 text-sm text-slate-200">
+                    {currentTurnIndex + 1} de {turnOrder.length}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
+                <p className="text-sm uppercase tracking-[0.35em] text-white/50">Estado</p>
+                <p className="mt-2 text-lg text-slate-200">
+                  {revealStep === 'covered'
+                    ? 'Muestra el papel de este jugador.'
+                    : currentTurnIndex + 1 < turnOrder.length
+                      ? 'Pulsa siguiente para pasar al proximo jugador.'
+                      : 'Ya todos vieron su papel. Ahora puede empezar la ronda.'}
+                </p>
+              </div>
+            </section>
+
+            <section
+              ref={resultPanelRef}
+              className="rounded-[2rem] border border-white/10 bg-black/30 p-6 shadow-inner shadow-black/25"
+            >
+              <div
+                className="rounded-[2rem] border border-white/10 bg-white/5 p-6"
+                style={{
+                  boxShadow: `0 0 0 1px ${selectedColor}18`,
+                }}
+              >
+                <div className="relative mx-auto flex min-h-[32rem] max-w-xl flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${selectedPanel}`}
+                    aria-hidden="true"
+                  />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_38%)]" />
+
+                  {revealStep === 'covered' ? (
+                    <div className="relative z-10 mt-4 flex w-full flex-col items-center">
+                      <div className="rounded-[2rem] border border-white/10 bg-black/25 px-6 py-8 text-center">
+                        <p className="text-sm uppercase tracking-[0.45em] text-white/55">
+                          Pasa el telefono
+                        </p>
+                        <p className="mt-5 text-3xl font-black" style={{ color: selectedColor }}>
+                          {currentPlayer.name}
+                        </p>
+                        <p className="mt-4 text-slate-200">
+                          Solo esta persona puede ver su secreto.
+                        </p>
+                      </div>
+
+                      <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row">
+                        <LiquidButton
+                          className="!h-24 !w-full !rounded-full !px-10 !text-xl sm:!h-20 sm:!px-12 sm:!text-lg"
+                          onClick={() => handleRevealAction()}
+                          size="xxl"
+                          variant="cool"
+                          type="button"
+                        >
+                          <span className="flex items-center gap-2">
+                            <FaUsers />
+                            Ver mi papel
+                          </span>
+                        </LiquidButton>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative z-10 mt-4 flex w-full flex-col items-center">
+                      <div className="rounded-[2rem] border border-white/10 bg-black/25 px-6 py-8 text-center">
+                        <p className="text-sm uppercase tracking-[0.45em] text-white/55">
+                          {isCurrentImpostor ? 'Tu papel' : 'Tu palabra'}
+                        </p>
+                        <p className="mt-5 text-3xl font-black" style={{ color: selectedColor }}>
+                          {isCurrentImpostor ? 'Eres el impostor' : secretItem.answer}
+                        </p>
+                        <p className="mt-4 text-slate-200">
+                          {isCurrentImpostor
+                            ? 'Tu tarea es escuchar, mirar y no delatarte.'
+                            : 'No digas esta palabra en voz alta hasta que termine la ronda.'}
+                        </p>
+                        {isCurrentImpostor && showHint && (
+                          <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-4">
+                            <p className="text-sm uppercase tracking-[0.35em] text-white/50">
+                              Pista secreta
+                            </p>
+                            <p className="mt-2 text-lg font-semibold text-white">{secretItem.clue}</p>
+                          </div>
+                        )}
+                        {isCurrentImpostor && !showHint && (
+                          <div className="mt-6 rounded-3xl border border-amber-400/30 bg-amber-500/10 p-4 text-amber-100">
+                            La pista fue desactivada al inicio de la partida.
+                          </div>
+                        )}
+                        {!isCurrentImpostor && (
+                          <div className="mt-6 rounded-3xl border border-emerald-400/30 bg-emerald-500/10 p-4 text-emerald-100">
+                            Esta palabra la comparte todo el grupo menos el impostor.
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row">
+                        <LiquidButton
+                          className="!h-24 !w-full !rounded-full !px-10 !text-xl sm:!h-20 sm:!px-12 sm:!text-lg"
+                          onClick={() => handleRevealAction()}
+                          size="xxl"
+                          variant="cool"
+                          type="button"
+                        >
+                          <span className="flex items-center gap-2">
+                            <FaUsers />
+                            {currentTurnIndex + 1 < turnOrder.length ? 'Siguiente' : 'Empezar ronda'}
+                          </span>
+                        </LiquidButton>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        {pendingCategoryChange && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
+              <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
+              <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+              <p className="mt-3 text-slate-200">
+                Si cambias la categoria, la partida actual se reiniciara.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                  onClick={() => setPendingCategoryChange(null)}
+                  type="button"
+                >
+                  Seguir jugando
+                </button>
+                <button
+                  className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                  onClick={commitPendingCategoryChange}
+                  type="button"
+                >
+                  Cambiar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (phase === 'round') {
+    return (
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
+        <div className="fixed left-4 top-4 z-50">
+          <LiquidButton
+            className="rounded-full"
+            onClick={(event) => {
+              onButtonPress(event);
+              onBackToHub();
+            }}
+            size="lg"
+            variant="cool"
+            type="button"
+          >
+            <span className="flex items-center gap-2">
+              <FaArrowLeft />
+              Volver
+            </span>
+          </LiquidButton>
+        </div>
+
+        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
+          <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+              <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
+              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Impostor</h1>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <LiquidButton
+                  className="rounded-full !px-4 !py-2 text-sm"
+                  onClick={(event) => {
+                    onButtonPress(event);
+                    setPendingCategoryChange({ kind: 'clear' });
+                  }}
+                  size="lg"
+                  variant="cool"
+                  type="button"
+                >
+                  Cambiar categoria
+                </LiquidButton>
+                <div
+                  className="rounded-full border px-4 py-2 text-sm text-white/80"
+                  style={{
+                    borderColor: `${selectedColor}55`,
+                    backgroundColor: `${selectedColor}12`,
+                  }}
+                >
+                  {selectedCategory?.label ?? 'Sin categoria'}
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-5">
+                <p className="text-sm uppercase tracking-[0.35em] text-white/50">Turno</p>
+                <div className="mt-3 flex items-center gap-4">
+                  <ParticipantAvatarBadge
+                    avatar={currentPlayer.avatar}
+                    backgroundColor={currentPlayer.color}
+                    seed={currentPlayer.avatarSeed}
+                    alt={currentPlayer.name}
+                    sizeClassName="h-16 w-16"
+                  />
+                  <div>
+                    <p className="text-3xl font-black" style={{ color: currentPlayer.color }}>
+                      {currentPlayer.name}
+                    </p>
+                    <p className="mt-1 text-slate-200">
+                      La discusion esta en marcha. Cuando termine el tiempo, elige votar o seguir
+                      con otra ronda.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
+                  <p className="text-sm uppercase tracking-[0.3em] text-white/50">Ronda</p>
+                  <p className="mt-2 text-sm text-slate-200">#{roundIndex}</p>
+                </div>
+
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
+                  <p className="text-sm uppercase tracking-[0.3em] text-white/50">Tiempo</p>
+                  <p className="mt-2 text-sm text-slate-200">
+                    {roundSecondsLeft > 0 ? `${roundSecondsLeft} segundos` : 'Tiempo terminado'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
+                <p className="text-sm uppercase tracking-[0.35em] text-white/50">Estado</p>
+                <p className="mt-2 text-lg text-slate-200">
+                  {roundSecondsLeft > 0
+                    ? 'Debatan y observen. Cuando llegue a cero podran votar o seguir con otra ronda.'
+                    : 'El tiempo termino. Ahora pueden votar o seguir con otra ronda.'}
+                </p>
+              </div>
+            </section>
+
+            <section
+              ref={resultPanelRef}
+              className="rounded-[2rem] border border-white/10 bg-black/30 p-6 shadow-inner shadow-black/25"
+            >
+              <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+                <div className="relative mx-auto flex min-h-[32rem] max-w-xl flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${selectedPanel}`}
+                    aria-hidden="true"
+                  />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_38%)]" />
+
+                  <div className="relative z-10 w-full text-center">
+                    <p className="text-sm uppercase tracking-[0.45em] text-white/55">
+                      <span className="inline-flex items-center gap-2">
+                        <FaClock />
+                        Ronda en curso
+                      </span>
+                    </p>
+                    <p className="mt-5 text-6xl font-black text-white">{roundSecondsLeft}</p>
+                    <p className="mt-3 text-slate-200">
+                      Cuando el contador llegue a cero, decide si seguir una ronda mas o pasar a
+                      votar.
+                    </p>
+
+                    <div className="mt-6 overflow-hidden rounded-full border border-white/10 bg-black/40">
+                      <div
+                        className="h-3 rounded-full bg-gradient-to-r from-rose-500 via-fuchsia-500 to-amber-400 transition-[width] duration-1000 ease-linear"
+                        style={{ width: roundProgressWidth }}
+                      />
+                    </div>
+
+                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                      <LiquidButton
+                        className="w-full"
+                        disabled={!roundFinished}
+                        onClick={(event) => {
+                          onButtonPress(event);
+                          handleContinueRound();
+                        }}
+                        size="xxl"
+                        variant="cool"
+                        type="button"
+                      >
+                        Seguir con otra ronda
+                      </LiquidButton>
+                      <LiquidButton
+                        className="w-full"
+                        disabled={!roundFinished}
+                        onClick={(event) => {
+                          onButtonPress(event);
+                          handleGoToVote();
+                        }}
+                        size="xxl"
+                        variant="cool"
+                        type="button"
+                      >
+                        <span className="flex items-center gap-2">
+                          <FaUsers />
+                          Votar
+                        </span>
+                      </LiquidButton>
+                    </div>
+
+                    {!roundFinished && (
+                      <p className="mt-4 text-sm text-slate-300">
+                        Espera a que termine el tiempo para habilitar las opciones.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        {pendingCategoryChange && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
+              <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
+              <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+              <p className="mt-3 text-slate-200">
+                Si cambias la categoria, la partida actual se reiniciara.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                  onClick={() => setPendingCategoryChange(null)}
+                  type="button"
+                >
+                  Seguir jugando
+                </button>
+                <button
+                  className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                  onClick={commitPendingCategoryChange}
+                  type="button"
+                >
+                  Cambiar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (phase === 'vote') {
+    return (
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
+        <div className="fixed left-4 top-4 z-50">
+          <LiquidButton
+            className="rounded-full"
+            onClick={(event) => {
+              onButtonPress(event);
+              onBackToHub();
+            }}
+            size="lg"
+            variant="cool"
+            type="button"
+          >
+            <span className="flex items-center gap-2">
+              <FaArrowLeft />
+              Volver
+            </span>
+          </LiquidButton>
+        </div>
+
+        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
+          <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+              <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
+              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Votacion</h1>
+              <p className="mt-3 max-w-2xl text-slate-200">
+                Selecciona a la persona que crees que es el impostor y confirma tu voto.
+              </p>
+
+              <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-5">
+                <p className="text-sm uppercase tracking-[0.35em] text-white/50">Ronda</p>
+                <p className="mt-2 text-3xl font-black" style={{ color: selectedColor }}>
+                  #{roundIndex}
+                </p>
+                <p className="mt-2 text-slate-200">
+                  Si votan al impostor, ganan todos los demas. Si se equivocan, gana el impostor.
+                </p>
+              </div>
+            </section>
+
+            <section
+              ref={resultPanelRef}
+              className="rounded-[2rem] border border-white/10 bg-black/30 p-6 shadow-inner shadow-black/25"
+            >
+              <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+                <p className="text-sm uppercase tracking-[0.45em] text-white/55">Elige un jugador</p>
+                <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                  {participants.map((participant) => {
+                    const isSelected = participant.id === selectedVoteId;
+
+                    return (
+                      <button
+                        key={participant.id}
+                        className="rounded-3xl border border-white/10 bg-black/25 p-4 text-left transition hover:-translate-y-0.5 hover:bg-white/8"
+                        onClick={(event) => {
+                          onButtonPress(event);
+                          setSelectedVoteId(participant.id);
+                        }}
+                        type="button"
+                        style={{
+                          boxShadow: isSelected ? `0 0 0 1px ${selectedColor}66` : undefined,
+                          borderColor: isSelected ? `${selectedColor}66` : undefined,
+                        }}
+                      >
+                        <ParticipantAvatarBadge
+                          avatar={participant.avatar}
+                          backgroundColor={participant.color}
+                          seed={participant.avatarSeed}
+                          alt={participant.name}
+                          sizeClassName="h-14 w-14"
+                        />
+                        <p className="mt-3 font-semibold">{participant.name}</p>
+                        <p className="mt-1 text-sm text-slate-300">
+                          {isSelected ? 'Seleccionado para votar' : 'Toca para elegir'}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <LiquidButton
+                    className="w-full"
+                    disabled={!selectedVoteId}
+                    onClick={(event) => {
+                      onButtonPress(event);
+                      handleVoteConfirm();
+                    }}
+                    size="xxl"
+                    variant="cool"
+                    type="button"
+                  >
+                    Confirmar voto
+                  </LiquidButton>
+                  <LiquidButton
+                    className="w-full"
+                    onClick={(event) => {
+                      onButtonPress(event);
+                      setPhase('round');
+                      setSelectedVoteId(null);
+                    }}
+                    size="xxl"
+                    variant="cool"
+                    type="button"
+                  >
+                    Volver a la ronda
+                  </LiquidButton>
+                </div>
+
+                {activeVotePlayer && (
+                  <p className="mt-4 text-sm text-slate-300">
+                    Votaras por <span className="font-semibold">{activeVotePlayer.name}</span>.
+                  </p>
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        {pendingCategoryChange && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
+              <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
+              <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+              <p className="mt-3 text-slate-200">
+                Si cambias la categoria, la partida actual se reiniciara.
+              </p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                  onClick={() => setPendingCategoryChange(null)}
+                  type="button"
+                >
+                  Seguir jugando
+                </button>
+                <button
+                  className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                  onClick={commitPendingCategoryChange}
+                  type="button"
+                >
+                  Cambiar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
-      <div className="fixed left-4 top-4 z-50">
+    <div className="flex min-h-screen items-center justify-center px-4 text-center text-white">
+      <div className="max-w-md rounded-3xl border border-white/10 bg-slate-950/80 p-8 shadow-2xl backdrop-blur-2xl">
+        <p className="text-2xl font-black">No hay partida activa.</p>
+        <p className="mt-2 text-slate-200">Vuelve al inicio y arranca una ronda nueva.</p>
         <LiquidButton
-          className="rounded-full"
+          className="mt-6"
           onClick={(event) => {
             onButtonPress(event);
             onBackToHub();
@@ -564,316 +1215,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           variant="cool"
           type="button"
         >
-          <span className="flex items-center gap-2">
-            <FaArrowLeft />
-            Volver
-          </span>
+          Volver
         </LiquidButton>
-      </div>
-
-      <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
-        <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
-          <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
-            <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
-            <h1 className="mt-2 text-4xl font-black sm:text-5xl">Impostor</h1>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              <LiquidButton
-                className="rounded-full !px-4 !py-2 text-sm"
-                onClick={(event) => {
-                  onButtonPress(event);
-
-                  if (!confirmCategoryChange()) {
-                    return;
-                  }
-
-                  resetRoundState();
-                  setSelectedCategoryKey(null);
-                }}
-                size="lg"
-                variant="cool"
-                type="button"
-              >
-                Cambiar categoría
-              </LiquidButton>
-              <div
-                className="rounded-full border px-4 py-2 text-sm text-white/80"
-                style={{
-                  borderColor: `${selectedColor}55`,
-                  backgroundColor: `${selectedColor}12`,
-                }}
-              >
-                {selectedCategory?.label ?? 'Sin categoría'}
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-5">
-              <p className="text-sm uppercase tracking-[0.35em] text-white/50">Jugadores</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {turnOrder.map((playerId, index) => {
-                  const participant = participants.find((entry) => entry.id === playerId);
-
-                  if (!participant) {
-                    return null;
-                  }
-
-                  const active = index === currentTurnIndex;
-
-                  return (
-                    <span
-                      key={playerId}
-                      className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm"
-                      style={{
-                        borderColor: active ? `${selectedColor}66` : 'rgba(255,255,255,0.08)',
-                        backgroundColor: active ? `${selectedColor}14` : 'rgba(255,255,255,0.03)',
-                      }}
-                    >
-                      <span
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{ backgroundColor: participant.color }}
-                      />
-                      {participant.name}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
-              <p className="text-sm uppercase tracking-[0.35em] text-white/50">Turno</p>
-              <div className="mt-3 flex items-center gap-4">
-                <ParticipantAvatarBadge
-                  avatar={currentPlayer.avatar}
-                  backgroundColor={currentPlayer.color}
-                  seed={currentPlayer.avatarSeed}
-                  alt={currentPlayer.name}
-                  sizeClassName="h-16 w-16"
-                />
-                <div>
-                  <p className="text-3xl font-black" style={{ color: currentPlayer.color }}>
-                    {currentPlayer.name}
-                  </p>
-                  <p className="mt-1 text-slate-200">
-                    Mantén presionada la bolsa para ver tu papel.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <button
-                className={`rounded-[1.5rem] border px-4 py-4 text-left transition ${
-                  showHint
-                    ? 'border-emerald-400/40 bg-emerald-500/10 text-white'
-                    : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'
-                }`}
-                onClick={(event) => {
-                  onButtonPress(event);
-                  setShowHint((value) => !value);
-                }}
-                type="button"
-              >
-                <span className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.3em]">
-                  {showHint ? <FaEye /> : <FaEyeSlash />}
-                  Pista
-                </span>
-                <span className="mt-2 block text-sm text-slate-200">
-                  {showHint
-                    ? 'Activa para mostrar la pista solo al impostor.'
-                    : 'Desactivada para jugar más difícil.'}
-                </span>
-              </button>
-
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
-                <p className="text-sm uppercase tracking-[0.3em] text-white/50">Ronda</p>
-                <p className="mt-2 text-sm text-slate-200">
-                  {currentTurnIndex + 1} de {turnOrder.length}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <LiquidButton
-                className="w-full"
-                disabled={!canStart}
-                onClick={(event) => {
-                  onButtonPress(event);
-                  startRound();
-                }}
-                size="xxl"
-                variant="cool"
-                type="button"
-              >
-                <span className="flex items-center gap-2">
-                  <FaMask />
-                  Empezar ronda
-                </span>
-              </LiquidButton>
-              {!canStart && (
-                <p className="mt-3 text-sm text-slate-300">
-                  Necesitas al menos 3 participantes y una categoría elegida.
-                </p>
-              )}
-            </div>
-          </section>
-
-          <section
-            ref={resultPanelRef}
-            className="rounded-[2rem] border border-white/10 bg-black/30 p-6 shadow-inner shadow-black/25"
-          >
-            <div
-              className={`rounded-[2rem] border border-white/10 bg-white/5 p-6 ${phase === 'reveal' ? 'app-reveal-focus' : ''}`}
-              style={{
-                boxShadow: `0 0 0 1px ${selectedColor}18`,
-              }}
-            >
-              <div className="relative mx-auto flex min-h-[32rem] max-w-xl flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${selectedPanel}`}
-                  aria-hidden="true"
-                />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),transparent_38%)]" />
-
-                {!bagOpen && !readyToContinue ? (
-                  <button
-                    className="relative z-10 mt-2 w-full touch-none select-none"
-                    onPointerDown={handleHoldStart}
-                    onPointerLeave={handleHoldEnd}
-                    onPointerUp={handleHoldEnd}
-                    onPointerCancel={handleHoldEnd}
-                    onContextMenu={(event) => event.preventDefault()}
-                    type="button"
-                  >
-                    <div
-                      className="relative mx-auto flex h-[22rem] w-full max-w-[20rem] items-end justify-center rounded-[2.5rem] border border-white/10 bg-black/20 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.35)]"
-                      style={{
-                        boxShadow: `0 0 0 1px ${selectedColor}22, 0 30px 80px rgba(0,0,0,0.35)`,
-                      }}
-                    >
-                      <div
-                        className="absolute left-1/2 top-0 h-20 w-40 -translate-x-1/2 rounded-b-[1.75rem] border border-white/10 bg-black/40 transition-transform duration-500"
-                        style={{
-                          background: `linear-gradient(180deg, rgba(255,255,255,0.14), rgba(0,0,0,0.22)), ${selectedColor}14`,
-                          transform: bagOpen
-                            ? 'translate(-50%, -20%) rotate(-8deg)'
-                            : 'translate(-50%, 0) rotate(0deg)',
-                        }}
-                      />
-                      <div
-                        className="relative flex w-full flex-col items-center rounded-[2rem] border border-white/10 bg-gradient-to-b from-black/10 to-black/35 px-6 py-10 transition-transform duration-500"
-                        style={{
-                          transform: isHolding
-                            ? 'translateY(-4px) scale(1.01)'
-                            : 'translateY(0) scale(1)',
-                        }}
-                      >
-                        <div
-                          className="mb-6 h-2 w-28 rounded-full"
-                          style={{
-                            backgroundColor: selectedColor,
-                            boxShadow: `0 0 18px ${selectedColor}66`,
-                          }}
-                        />
-                        <div
-                          className="flex h-24 w-24 items-center justify-center rounded-full border border-white/15 bg-white/10"
-                          style={{
-                            boxShadow: `0 0 0 1px ${selectedColor}33`,
-                          }}
-                        >
-                          <FaHandPaper className="text-4xl" />
-                        </div>
-                        <p className="mt-6 text-center text-2xl font-black">Mantén presionado</p>
-                        <p className="mt-2 max-w-xs text-center text-sm text-slate-200">
-                          La bolsa se abre mientras mantienes el dedo o el mouse pulsado.
-                        </p>
-
-                        <div className="mt-8 w-full overflow-hidden rounded-full border border-white/10 bg-black/35">
-                          <div
-                            className="h-3 rounded-full transition-[width] duration-75 ease-linear"
-                            style={{
-                              width: `${holdProgress * 100}%`,
-                              backgroundColor: selectedColor,
-                            }}
-                          />
-                        </div>
-
-                        <p className="mt-3 text-xs uppercase tracking-[0.4em] text-white/50">
-                          {holdProgress < 1 ? 'Presiona y mantén' : 'Abriendo...'}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                ) : readyToContinue ? (
-                  <div className="relative z-10 mt-4 flex w-full flex-col items-center">
-                    <div className="rounded-[2rem] border border-white/10 bg-black/25 px-6 py-8 text-center">
-                      <p className="text-sm uppercase tracking-[0.45em] text-white/55">
-                        Secreto visto
-                      </p>
-                      <p className="mt-5 text-3xl font-black" style={{ color: selectedColor }}>
-                        Pasa el teléfono
-                      </p>
-                      <p className="mt-4 text-slate-200">
-                        Ya viste tu papel. Ahora deja que siga el siguiente jugador.
-                      </p>
-                    </div>
-
-                    <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row">
-                      <LiquidButton
-                        className="!h-24 !w-full !rounded-full !px-10 !text-xl sm:!h-20 sm:!px-12 sm:!text-lg"
-                        onClick={handleNextPlayer}
-                        size="xxl"
-                        variant="cool"
-                        type="button"
-                      >
-                        <span className="flex items-center gap-2">
-                          <FaChevronRight />
-                          Continuar
-                        </span>
-                      </LiquidButton>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative z-10 mt-4 flex w-full flex-col items-center">
-                    <div className="rounded-[2rem] border border-white/10 bg-black/25 px-6 py-8 text-center">
-                      <p className="text-sm uppercase tracking-[0.45em] text-white/55">
-                        {isCurrentImpostor ? 'Tu papel' : 'Tu palabra'}
-                      </p>
-                      <p className="mt-5 text-3xl font-black" style={{ color: selectedColor }}>
-                        {isCurrentImpostor ? 'Eres el impostor' : secretItem.answer}
-                      </p>
-                      <p className="mt-4 text-slate-200">
-                        {isCurrentImpostor
-                          ? 'Tu tarea es escuchar, mirar y no delatarte.'
-                          : 'No digas esta palabra en voz alta hasta que termine la ronda.'}
-                      </p>
-                      {isCurrentImpostor && showHint && (
-                        <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-4">
-                          <p className="text-sm uppercase tracking-[0.35em] text-white/50">
-                            Pista secreta
-                          </p>
-                          <p className="mt-2 text-lg font-semibold text-white">
-                            {secretItem.clue}
-                          </p>
-                        </div>
-                      )}
-                      {isCurrentImpostor && !showHint && (
-                        <div className="mt-6 rounded-3xl border border-amber-400/30 bg-amber-500/10 p-4 text-amber-100">
-                          La pista fue desactivada al inicio de la ronda.
-                        </div>
-                      )}
-                      {!isCurrentImpostor && (
-                        <div className="mt-6 rounded-3xl border border-emerald-400/30 bg-emerald-500/10 p-4 text-emerald-100">
-                          Esta palabra la comparte todo el grupo menos el impostor.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-        </div>
       </div>
     </div>
   );

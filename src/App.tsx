@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
+import { FaDownload, FaTimes } from 'react-icons/fa';
 import GameHub from './components/GameHub';
 import ImpostorGame from './components/ImpostorGame';
 import Roulette from './components/Roulette';
 import WelcomeScreen from './components/WelcomeScreen';
 import TruthOrDareGame from './components/TruthOrDareGame';
+import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import DigitalGlitch from '@/components/ui/digital-glitch';
 import {
   participantAvatarOrder,
@@ -34,6 +36,26 @@ const BUTTON_GLITCH_STRENGTH = 0.5;
 const BUTTON_GLITCH_RADIUS_MULTIPLIER = 0.5;
 
 const storageKey = 'mondefan.participants';
+
+const isStandaloneDisplay = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+};
+
+const isIosSafari = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const userAgent = window.navigator.userAgent;
+  return /iPhone|iPad|iPod/i.test(userAgent) && /Safari/i.test(userAgent) && !/CriOS|FxiOS/i.test(userAgent);
+};
 
 const isParticipantAvatar = (value: unknown): value is ParticipantAvatar =>
   typeof value === 'string' && participantAvatarOrder.includes(value as ParticipantAvatar);
@@ -124,6 +146,12 @@ function App() {
   const [participants, setParticipants] = useState<Participant[]>(loadParticipants);
   const [pendingExit, setPendingExit] = useState<Stage | null>(null);
   const [buttonPulse, setButtonPulse] = useState<ButtonPulse | null>(null);
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<BeforeInstallPromptEvent | null>(
+    null,
+  );
+  const [isAppInstalled, setIsAppInstalled] = useState(isStandaloneDisplay);
+  const [showIosInstallHelp, setShowIosInstallHelp] = useState(false);
+  const [showInstallHelp, setShowInstallHelp] = useState(false);
   const backgroundProps =
     stage === 'welcome'
       ? {
@@ -183,6 +211,30 @@ function App() {
     return () => window.clearTimeout(timeout);
   }, [buttonPulse]);
 
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setDeferredInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredInstallPrompt(null);
+      setIsAppInstalled(true);
+      setShowIosInstallHelp(false);
+      setShowInstallHelp(false);
+    };
+
+    setIsAppInstalled(isStandaloneDisplay());
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
   const triggerButtonPulse = (event: ReactMouseEvent<HTMLElement>) => {
     const target = event.currentTarget.getBoundingClientRect();
     setButtonPulse({
@@ -222,6 +274,29 @@ function App() {
     setStage('hub');
   };
 
+  const handleInstallApp = async () => {
+    if (isAppInstalled) {
+      return;
+    }
+
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        setIsAppInstalled(true);
+      }
+      setDeferredInstallPrompt(null);
+      return;
+    }
+
+    if (isIosSafari()) {
+      setShowIosInstallHelp(true);
+      return;
+    }
+
+    setShowInstallHelp(true);
+  };
+
   if (stage === 'welcome') {
     return (
       <div className="relative min-h-screen overflow-hidden">
@@ -243,6 +318,22 @@ function App() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <DigitalGlitch {...backgroundProps} pulse={buttonPulse} />
+      {!isAppInstalled && (
+        <div className="fixed right-4 top-4 z-50">
+          <LiquidButton
+            className="rounded-full !px-4 !py-3 shadow-2xl"
+            onClick={handleInstallApp}
+            size="lg"
+            variant="cool"
+            type="button"
+          >
+            <span className="flex items-center gap-2">
+              <FaDownload />
+              Instalar
+            </span>
+          </LiquidButton>
+        </div>
+      )}
       <div key={`games-${stage}-${gameMode}`} className="app-stage-in">
         {stage === 'hub' ? (
           <GameHub
@@ -304,6 +395,80 @@ function App() {
                   Volver
                 </button>
               </div>
+          </div>
+        </div>
+      )}
+
+      {showIosInstallHelp && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm uppercase tracking-[0.45em] text-white/60">Instalar en iPhone</p>
+                <h2 className="mt-2 text-2xl font-black">Agregar a pantalla de inicio</h2>
+              </div>
+              <button
+                className="rounded-full border border-white/10 bg-white/10 p-2 text-white transition hover:bg-white/15"
+                onClick={() => setShowIosInstallHelp(false)}
+                type="button"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="mt-4 rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
+              <p>1. Toca el boton de compartir en Safari.</p>
+              <p className="mt-2">2. Elige "Agregar a pantalla de inicio".</p>
+              <p className="mt-2">3. Confirma para abrir el juego como app.</p>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <LiquidButton
+                onClick={() => setShowIosInstallHelp(false)}
+                size="lg"
+                variant="cool"
+                type="button"
+              >
+                Entendido
+              </LiquidButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showInstallHelp && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm uppercase tracking-[0.45em] text-white/60">Instalación</p>
+                <h2 className="mt-2 text-2xl font-black">No aparece el aviso</h2>
+              </div>
+              <button
+                className="rounded-full border border-white/10 bg-white/10 p-2 text-white transition hover:bg-white/15"
+                onClick={() => setShowInstallHelp(false)}
+                type="button"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="mt-4 rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
+              <p>Si estás probando la app en modo desarrollo, primero abre una vista instalada o una versión compilada.</p>
+              <p className="mt-2">En Chrome/Edge: busca la opción de instalar en la barra del navegador.</p>
+              <p className="mt-2">En iPhone/Safari: usa Compartir y luego “Agregar a pantalla de inicio”.</p>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <LiquidButton
+                onClick={() => setShowInstallHelp(false)}
+                size="lg"
+                variant="cool"
+                type="button"
+              >
+                Entendido
+              </LiquidButton>
+            </div>
           </div>
         </div>
       )}
