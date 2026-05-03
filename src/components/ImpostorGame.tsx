@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   FaArrowLeft,
   FaClock,
@@ -539,33 +540,35 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           </div>
         </div>
 
-        {pendingCategoryChange && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
-              <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
-              <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
-              <p className="mt-3 text-slate-200">
-                Si cambias la categoria, se reiniciara la partida actual.
-              </p>
-              <div className="mt-6 flex gap-3">
-                <button
-                  className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                  onClick={() => setPendingCategoryChange(null)}
-                  type="button"
-                >
-                  Seguir jugando
-                </button>
-                <button
-                  className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
-                  onClick={commitPendingCategoryChange}
-                  type="button"
-                >
-                  Cambiar
-                </button>
+        {pendingCategoryChange &&
+          createPortal(
+            <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 px-4 backdrop-blur-md">
+              <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-center text-white shadow-2xl">
+                <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
+                <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+                <p className="mt-3 text-slate-200">
+                  Si cambias la categoria, se reiniciara la partida actual.
+                </p>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                    onClick={() => setPendingCategoryChange(null)}
+                    type="button"
+                  >
+                    Seguir jugando
+                  </button>
+                  <button
+                    className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                    onClick={commitPendingCategoryChange}
+                    type="button"
+                  >
+                    Cambiar
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body,
+          )}
       </div>
     );
   }
@@ -812,33 +815,35 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           </div>
         </div>
 
-        {pendingCategoryChange && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
-              <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
-              <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
-              <p className="mt-3 text-slate-200">
-                Si cambias la categoria, la partida actual se reiniciara.
-              </p>
-              <div className="mt-6 flex gap-3">
-                <button
-                  className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                  onClick={() => setPendingCategoryChange(null)}
-                  type="button"
-                >
-                  Seguir jugando
-                </button>
-                <button
-                  className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
-                  onClick={commitPendingCategoryChange}
-                  type="button"
-                >
-                  Cambiar
-                </button>
+        {pendingCategoryChange &&
+          createPortal(
+            <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 px-4 backdrop-blur-md">
+              <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-center text-white shadow-2xl">
+                <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
+                <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+                <p className="mt-3 text-slate-200">
+                  Si cambias la categoria, se reiniciara la partida actual.
+                </p>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                    onClick={() => setPendingCategoryChange(null)}
+                    type="button"
+                  >
+                    Seguir jugando
+                  </button>
+                  <button
+                    className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                    onClick={commitPendingCategoryChange}
+                    type="button"
+                  >
+                    Cambiar
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body,
+          )}
       </div>
     );
   }
@@ -1017,33 +1022,35 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           </div>
         </div>
 
-        {pendingCategoryChange && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
-              <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
-              <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
-              <p className="mt-3 text-slate-200">
-                Si cambias la categoria, la partida actual se reiniciara.
-              </p>
-              <div className="mt-6 flex gap-3">
-                <button
-                  className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                  onClick={() => setPendingCategoryChange(null)}
-                  type="button"
-                >
-                  Seguir jugando
-                </button>
-                <button
-                  className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
-                  onClick={commitPendingCategoryChange}
-                  type="button"
-                >
-                  Cambiar
-                </button>
+        {pendingCategoryChange &&
+          createPortal(
+            <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 px-4 backdrop-blur-md">
+              <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-center text-white shadow-2xl">
+                <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
+                <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+                <p className="mt-3 text-slate-200">
+                  Si cambias la categoria, se reiniciara la partida actual.
+                </p>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                    onClick={() => setPendingCategoryChange(null)}
+                    type="button"
+                  >
+                    Seguir jugando
+                  </button>
+                  <button
+                    className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                    onClick={commitPendingCategoryChange}
+                    type="button"
+                  >
+                    Cambiar
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body,
+          )}
       </div>
     );
   }
@@ -1169,33 +1176,35 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           </div>
         </div>
 
-        {pendingCategoryChange && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
-              <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
-              <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
-              <p className="mt-3 text-slate-200">
-                Si cambias la categoria, la partida actual se reiniciara.
-              </p>
-              <div className="mt-6 flex gap-3">
-                <button
-                  className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                  onClick={() => setPendingCategoryChange(null)}
-                  type="button"
-                >
-                  Seguir jugando
-                </button>
-                <button
-                  className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
-                  onClick={commitPendingCategoryChange}
-                  type="button"
-                >
-                  Cambiar
-                </button>
+        {pendingCategoryChange &&
+          createPortal(
+            <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 px-4 backdrop-blur-md">
+              <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-center text-white shadow-2xl">
+                <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
+                <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+                <p className="mt-3 text-slate-200">
+                  Si cambias la categoria, se reiniciara la partida actual.
+                </p>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                    onClick={() => setPendingCategoryChange(null)}
+                    type="button"
+                  >
+                    Seguir jugando
+                  </button>
+                  <button
+                    className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                    onClick={commitPendingCategoryChange}
+                    type="button"
+                  >
+                    Cambiar
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body,
+          )}
       </div>
     );
   }
@@ -1223,3 +1232,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 }
 
 export default ImpostorGame;
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { Wheel, type WheelDataType } from 'react-custom-roulette';
 import { FaArrowLeft } from 'react-icons/fa';
 import type { MouseEvent as ReactMouseEvent } from 'react';
@@ -21,6 +21,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
   const [prizeNumber, setPrizeNumber] = useState(0);
   const [selected, setSelected] = useState<Participant | null>(null);
   const [spinProfile, setSpinProfile] = useState<SpinProfile>('agile');
+  const resultPanelRef = useRef<HTMLElement | null>(null);
 
   const spinDurationByProfile: Record<SpinProfile, number> = {
     agile: 0.9,
@@ -80,6 +81,21 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
     setMustSpin(false);
   };
 
+  useEffect(() => {
+    if (!selected) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      resultPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, [selected]);
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
       <div className="fixed left-4 top-4 z-50">
@@ -108,12 +124,12 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
             <p className="mb-3 text-sm uppercase tracking-[0.5em] text-white/80">MondeFan</p>
             <h1 className="text-5xl font-black sm:text-6xl">Ruleta</h1>
             <p className="mt-3 max-w-xl text-slate-100">
-              Una ruleta más viva, más brillante y mucho más fácil de leer.
+              Una ruleta mÃ¡s viva, mÃ¡s brillante y mucho mÃ¡s fÃ¡cil de leer.
             </p>
 
             <div className="mt-6 flex flex-wrap justify-center gap-2">
               {[
-                { key: 'agile', label: 'Ágil' },
+                { key: 'agile', label: 'Ãgil' },
                 { key: 'normal', label: 'Normal' },
                 { key: 'smooth', label: 'Suave' },
               ].map((option) => (
@@ -187,7 +203,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
             </LiquidButton>
           </section>
 
-          <aside className="rounded-[2rem] border border-white/10 bg-white/5 p-6 text-center shadow-inner shadow-black/20">
+          <aside ref={resultPanelRef} className="rounded-[2rem] border border-white/10 bg-white/5 p-6 text-center shadow-inner shadow-black/20">
             <p className="text-sm uppercase tracking-[0.4em] text-white/70">Resultado</p>
             {selected ? (
               <div className="mt-6 app-fade-up">
@@ -204,7 +220,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
                 <p className="mt-5 text-3xl font-black" style={{ color: selected.color }}>
                   {selected.name}
                 </p>
-                <p className="mt-3 text-slate-100">La rueda cayó aquí.</p>
+                <p className="mt-3 text-slate-100">La rueda cayÃ³ aquÃ­.</p>
               </div>
             ) : (
               <div className="mt-8 rounded-3xl border border-dashed border-white/15 bg-black/20 p-8">
@@ -220,3 +236,5 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
 }
 
 export default Roulette;
+
+

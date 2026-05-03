@@ -1,20 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="MondeFan">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="MondeFan">
   <defs>
-    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="55%" stop-color="#312e81" />
-      <stop offset="100%" stop-color="#7c3aed" />
+    <radialGradient id="bgGlow" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#12102a" />
+      <stop offset="100%" stop-color="#050508" />
+    </radialGradient>
+    <linearGradient id="ringTop" x1="20%" y1="10%" x2="90%" y2="30%">
+      <stop offset="0%" stop-color="#29d8ff" />
+      <stop offset="48%" stop-color="#8d63ff" />
+      <stop offset="100%" stop-color="#ff54a8" />
     </linearGradient>
-    <linearGradient id="fg" x1="0%" x2="100%" y1="0%" y2="100%">
-      <stop offset="0%" stop-color="#fff7ed" />
-      <stop offset="100%" stop-color="#c4b5fd" />
+    <linearGradient id="ringBottom" x1="15%" y1="75%" x2="90%" y2="95%">
+      <stop offset="0%" stop-color="#7a54ff" />
+      <stop offset="55%" stop-color="#ff4fb9" />
+      <stop offset="100%" stop-color="#ffbf2a" />
+    </linearGradient>
+    <linearGradient id="textFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f5f7ff" />
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#bg)" />
-  <circle cx="166" cy="170" r="28" fill="#22d3ee" opacity="0.95" />
-  <circle cx="352" cy="152" r="18" fill="#f472b6" opacity="0.9" />
-  <circle cx="370" cy="334" r="24" fill="#facc15" opacity="0.9" />
-  <path d="M122 330C168 220 214 168 256 168s88 52 134 162" fill="none" stroke="url(#fg)" stroke-width="34" stroke-linecap="round" />
-  <path d="M158 352h196" fill="none" stroke="#f8fafc" stroke-width="28" stroke-linecap="round" opacity="0.9" />
-  <text x="256" y="284" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="112" font-weight="700" text-anchor="middle">MF</text>
+
+  <rect width="1024" height="1024" fill="url(#bgGlow)" />
+
+  <path
+    d="M 315 375 A 270 270 0 0 1 709 377"
+    fill="none"
+    stroke="url(#ringTop)"
+    stroke-linecap="round"
+    stroke-width="52"
+  />
+  <path
+    d="M 289 622 A 270 270 0 0 0 716 760"
+    fill="none"
+    stroke="url(#ringBottom)"
+    stroke-linecap="round"
+    stroke-width="52"
+  />
+  <circle cx="260" cy="523" r="26" fill="#2de0ff" />
+  <circle cx="779" cy="520" r="26" fill="#ff4f9b" />
+  <circle cx="715" cy="802" r="29" fill="#ffc61f" />
+
+  <text
+    x="512"
+    y="575"
+    fill="url(#textFill)"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="220"
+    font-weight="800"
+    text-anchor="middle"
+    letter-spacing="-10"
+  >
+    MF
+  </text>
 </svg>

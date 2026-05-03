@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { FaArrowLeft, FaForward, FaGlassCheers, FaQuestionCircle } from 'react-icons/fa';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 
@@ -88,6 +89,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
   const [truthDeckIndex, setTruthDeckIndex] = useState(0);
   const turnPanelRef = useRef<HTMLDivElement | null>(null);
   const resultPanelRef = useRef<HTMLDivElement | null>(null);
+  const shouldAutoScroll = typeof window !== 'undefined' && window.innerWidth >= 768;
 
   const currentPlayer = participants.find((participant) => participant.id === turnOrder[currentTurnIndex]);
   const selectedCategory = selectedCategoryKey ? truthCategoryMap[selectedCategoryKey] : null;
@@ -148,7 +150,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
   }, [selectedCategoryKey, selectedCategory?.questions]);
 
   useEffect(() => {
-    if (mode === 'idle') {
+    if (mode === 'idle' || !shouldAutoScroll) {
       return;
     }
 
@@ -160,7 +162,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
     }, 120);
 
     return () => window.clearTimeout(timer);
-  }, [mode]);
+  }, [mode, shouldAutoScroll]);
 
   const drawTruth = () => {
     if (!selectedCategory) {
@@ -234,15 +236,8 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
   };
 
   const selectCategory = (categoryKey: TruthCategoryKey) => {
-    const shouldChange = window.confirm(
-      'Cambiar de categoría reiniciará la ronda actual. ¿Quieres continuar?',
-    );
-
-    if (!shouldChange) {
-      return;
-    }
-
     setSelectedCategoryKey(categoryKey);
+    setShowCategoryChangeWarning(false);
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
@@ -298,9 +293,9 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
           <div className="relative z-10">
             <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
-              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Elige una categoría</h1>
+              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Elige una categorÃ­a</h1>
               <p className="mt-3 max-w-2xl text-slate-200">
-                Primero selecciona la categoría de verdades. Después entramos al juego con la ronda
+                Primero selecciona la categorÃ­a de verdades. DespuÃ©s entramos al juego con la ronda
                 aleatoria.
               </p>
 
@@ -401,7 +396,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                 variant="cool"
                 type="button"
               >
-                Cambiar categoría
+                Cambiar categorÃ­a
               </LiquidButton>
               <div
                 className="rounded-full border px-4 py-2 text-sm text-white/80"
@@ -433,7 +428,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                     {currentPlayer.name}
                   </p>
                   <p className="mt-1 text-slate-200">
-                    Elige una verdad de {selectedCategory.label.toLowerCase()} o prepárate para el
+                    Elige una verdad de {selectedCategory.label.toLowerCase()} o prepÃ¡rate para el
                     shot.
                   </p>
                 </div>
@@ -479,11 +474,11 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
               <p className="text-sm uppercase tracking-[0.35em] text-white/50">Estado</p>
               <p className="mt-2 text-lg text-slate-200">
                 {mode === 'idle'
-                  ? 'Selecciona una opción para empezar.'
+                  ? 'Selecciona una opciÃ³n para empezar.'
                   : mode === 'truth'
                     ? 'Verdad activa.'
                     : shotCompleted
-                      ? '¡Shot tomado!'
+                      ? 'Â¡Shot tomado!'
                       : 'Cuenta regresiva en curso.'}
               </p>
             </div>
@@ -498,7 +493,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                 <p className="text-sm uppercase tracking-[0.4em] text-white/55">Listos</p>
                 <p className="mt-4 text-3xl font-black">Verdad o Shot</p>
                 <p className="mt-3 max-w-md text-slate-200">
-                  Aquí verás una pregunta de la categoría elegida o un shot con cronómetro.
+                  AquÃ­ verÃ¡s una pregunta de la categorÃ­a elegida o un shot con cronÃ³metro.
                 </p>
               </div>
             ) : (
@@ -532,7 +527,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                         <p className="mt-4 text-6xl font-black text-white">{shotSecondsLeft}</p>
                         {shotCompleted && (
                           <p className="mt-4 text-lg font-semibold text-emerald-300">
-                            ¡Shot tomado!
+                            Â¡Shot tomado!
                           </p>
                         )}
                       </div>
@@ -561,38 +556,40 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
         </div>
       </div>
 
-      {showCategoryChangeWarning && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
-            <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
-            <h2 className="mt-3 text-2xl font-black">Cambiar categoría</h2>
-            <p className="mt-3 text-slate-200">Si cambias la categoría, la ronda actual se reiniciará.</p>
-            <div className="mt-6 flex gap-3">
-              <button
-                className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-                onClick={() => setShowCategoryChangeWarning(false)}
-                type="button"
-              >
-                Seguir jugando
-              </button>
-              <button
-                className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
-                onClick={() => {
-                  setShowCategoryChangeWarning(false);
-                  setSelectedCategoryKey(null);
-                  window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth',
-                  });
-                }}
-                type="button"
-              >
-                Cambiar
-              </button>
+      {showCategoryChangeWarning &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-md">
+            <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
+              <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
+              <h2 className="mt-3 text-2xl font-black">Cambiar categoría</h2>
+              <p className="mt-3 text-slate-200">Si cambias la categoría, la ronda actual se reiniciará.</p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+                  onClick={() => setShowCategoryChangeWarning(false)}
+                  type="button"
+                >
+                  Seguir jugando
+                </button>
+                <button
+                  className="flex-1 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                  onClick={() => {
+                    setShowCategoryChangeWarning(false);
+                    setSelectedCategoryKey(null);
+                    window.scrollTo({
+                      top: 0,
+                      behavior: 'smooth',
+                    });
+                  }}
+                  type="button"
+                >
+                  Cambiar
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
