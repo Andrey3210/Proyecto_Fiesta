@@ -52,8 +52,8 @@ export default function RadialOrbitalTimeline({
     }
 
     const interval = window.setInterval(() => {
-      setRotationAngle((current) => (current + 0.08) % 360);
-    }, 32);
+      setRotationAngle((current) => (current + 0.14) % 360);
+    }, 24);
 
     return () => window.clearInterval(interval);
   }, [autoRotate]);
@@ -69,7 +69,7 @@ export default function RadialOrbitalTimeline({
     const updateRadius = () => {
       setCanAutoRotate(window.innerWidth >= 768);
       setAutoRotate(window.innerWidth >= 768);
-      setRadius(window.innerWidth < 640 ? 138 : 216);
+      setRadius(window.innerWidth < 640 ? 118 : 216);
     };
 
     updateRadius();
@@ -107,7 +107,7 @@ export default function RadialOrbitalTimeline({
   return (
     <div
       ref={containerRef}
-      className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden px-4 py-6 pt-16 text-white app-fade-up"
+      className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden px-4 py-5 pt-14 text-white app-fade-up sm:py-6 sm:pt-16"
       onClick={handleBackgroundClick}
     >
       <div className="absolute inset-0 bg-black/18" />
@@ -117,22 +117,22 @@ export default function RadialOrbitalTimeline({
           <p className="mb-3 text-xs uppercase tracking-[0.5em] text-white/60">
             MondeFan
           </p>
-          <h1 className="text-5xl font-black sm:text-6xl">{title}</h1>
-          <p className="mx-auto mt-3 max-w-3xl text-sm text-slate-100/90 sm:text-base">
+          <h1 className="text-4xl font-black sm:text-6xl">{title}</h1>
+          <p className="mx-auto mt-3 max-w-3xl text-xs text-slate-100/90 sm:text-base">
             {subtitle}
           </p>
         </div>
 
-        <div className="relative flex min-h-[560px] items-center justify-center">
+        <div className="relative flex min-h-[440px] items-center justify-center sm:min-h-[560px]">
           <div
             ref={orbitRef}
             className="absolute inset-0 flex items-center justify-center"
             style={{ transform: 'translate(0px, 0px)' }}
           >
-            <div className="absolute h-32 w-32 rounded-full bg-gradient-to-br from-fuchsia-500 via-indigo-500 to-cyan-400 opacity-95 shadow-[0_0_100px_rgba(255,255,255,0.32)]" />
-            <div className="absolute h-44 w-44 rounded-full border border-white/12" />
-            <div className="absolute h-80 w-80 rounded-full border border-white/10" />
-            <div className="absolute h-[26rem] w-[26rem] rounded-full border border-white/10" />
+            <div className="absolute h-24 w-24 rounded-full bg-gradient-to-br from-fuchsia-500 via-indigo-500 to-cyan-400 opacity-95 shadow-[0_0_100px_rgba(255,255,255,0.32)] sm:h-32 sm:w-32" />
+            <div className="absolute h-36 w-36 rounded-full border border-white/12 sm:h-44 sm:w-44" />
+            <div className="absolute h-64 w-64 rounded-full border border-white/10 sm:h-80 sm:w-80" />
+            <div className="absolute h-[20rem] w-[20rem] rounded-full border border-white/10 sm:h-[26rem] sm:w-[26rem]" />
 
             {timelineData.map((item, index) => {
               const position = calculateNodePosition(index, timelineData.length);
@@ -182,7 +182,7 @@ export default function RadialOrbitalTimeline({
 
                   <div
                     className={cn(
-                      'relative flex h-20 w-20 items-center justify-center rounded-full border-2 backdrop-blur-xl transition-all duration-300 sm:h-24 sm:w-24',
+                      'relative flex h-16 w-16 items-center justify-center rounded-full border-2 backdrop-blur-xl transition-all duration-300 sm:h-24 sm:w-24',
                       isExpanded
                         ? 'border-white bg-white text-slate-950 shadow-[0_0_44px_rgba(255,255,255,0.45)]'
                         : 'border-white/35 bg-black/50 text-white shadow-[0_0_28px_rgba(255,255,255,0.12)]',
@@ -221,7 +221,7 @@ export default function RadialOrbitalTimeline({
                           <div className="mb-2 flex items-center justify-between text-xs text-white/70">
                             <span className="flex items-center gap-1">
                               <Zap size={12} />
-                              Energ?a
+                              Energía
                             </span>
                             <span>{item.energy}%</span>
                           </div>

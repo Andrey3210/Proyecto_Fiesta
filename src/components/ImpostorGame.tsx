@@ -80,6 +80,12 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   const activeVotePlayer = selectedVoteId
     ? participants.find((participant) => participant.id === selectedVoteId)
     : null;
+  const scrollPageToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
   const scrollResultToTop = () => {
     window.setTimeout(() => {
       resultPanelRef.current?.scrollIntoView({
@@ -147,21 +153,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
     return () => window.clearTimeout(timer);
   }, [phase, roundSecondsLeft]);
 
-  useEffect(() => {
-    if (phase === 'setup') {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      resultPanelRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }, 120);
-
-    return () => window.clearTimeout(timer);
-  }, [phase, currentTurnIndex, roundIndex, roundSecondsLeft]);
-
   const startMatch = (categoryKey = selectedCategoryKey) => {
     const category = categoryKey ? impostorCategoryMap[categoryKey] : null;
 
@@ -188,11 +179,13 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
     setVoteResult(null);
     setVotedPlayerId(null);
     setPhase('reveal');
+    scrollPageToTop();
   };
 
   const handleRevealAction = () => {
     if (revealStep === 'covered') {
       setRevealStep('shown');
+      scrollResultToTop();
       return;
     }
 
@@ -243,8 +236,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
   if (phase === 'setup') {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
-        <div className="fixed left-4 top-4 z-50">
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
           <LiquidButton
             className="rounded-full !px-4 !py-4"
             onClick={(event) => {
@@ -260,12 +253,12 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           </LiquidButton>
         </div>
 
-        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10">
-            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/25 sm:p-6">
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
-              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Impostor</h1>
+              <h1 className="mt-2 text-3xl font-black sm:text-5xl">Impostor</h1>
               <p className="mt-3 max-w-2xl text-slate-200">
                 Elige una categoría y empieza. Sin pasos extra.
               </p>
@@ -329,7 +322,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
               <div className="mt-6 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
                 <div
-                  className="rounded-[1.75rem] border border-white/10 bg-black/25 p-5"
+                  className="rounded-[1.75rem] border border-white/10 bg-black/25 p-4 sm:p-5"
                   style={{
                     boxShadow: selectedCategory ? `0 0 0 1px ${selectedColor}22` : undefined,
                   }}
@@ -365,7 +358,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   )}
                 </div>
 
-                <div className="rounded-[1.75rem] border border-white/10 bg-black/25 p-5">
+                <div className="rounded-[1.75rem] border border-white/10 bg-black/25 p-4 sm:p-5">
                   <p className="text-sm uppercase tracking-[0.35em] text-white/50">Ajustes</p>
                   <button
                     className={`mt-4 w-full rounded-[1.4rem] border px-4 py-4 text-left transition ${
@@ -412,8 +405,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
       voteResult === 'group-wins' ? 'Ganaron los demás' : 'Ganó el impostor';
 
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
-        <div className="fixed left-4 top-4 z-50">
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
           <LiquidButton
             className="rounded-full !px-4 !py-4"
             onClick={(event) => {
@@ -429,18 +422,18 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           </LiquidButton>
         </div>
 
-        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/25 sm:p-6">
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
-              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Ronda terminada</h1>
+              <h1 className="mt-2 text-3xl font-black sm:text-5xl">Ronda terminada</h1>
               <p className="mt-3 text-slate-200">
                 La categoría era <span className="font-semibold">{selectedCategory?.emoji ?? '🎭'}</span>.
               </p>
 
               <div
-                className="mt-6 rounded-[1.75rem] border border-white/10 bg-black/25 p-6"
+                className="mt-6 rounded-[1.75rem] border border-white/10 bg-black/25 p-5 sm:p-6"
                 style={{
                   boxShadow: `0 0 0 1px ${selectedColor}22`,
                 }}
@@ -501,7 +494,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
               </div>
             </section>
 
-            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/25 sm:p-6">
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">Resumen</p>
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 {participants.slice(0, 6).map((participant) => {
@@ -601,8 +594,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
   if (phase === 'reveal') {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
-        <div className="fixed left-4 top-4 z-50">
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
           <LiquidButton
             className="rounded-full !px-4 !py-4"
             onClick={(event) => {
@@ -618,12 +611,12 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           </LiquidButton>
         </div>
 
-        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
-            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/25 sm:p-6">
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
-              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Impostor</h1>
+              <h1 className="mt-2 text-3xl font-black sm:text-5xl">Impostor</h1>
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <LiquidButton
@@ -649,7 +642,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                 </div>
               </div>
 
-              <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-5">
+              <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-4 sm:p-5">
                 <p className="text-sm uppercase tracking-[0.35em] text-white/50">Turno</p>
                 <div className="mt-3 flex items-center gap-4">
                   <ParticipantAvatarBadge
@@ -676,7 +669,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                 </p>
               </div>
 
-              <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
+              <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-4 sm:p-5">
                 <p className="mt-2 text-lg text-slate-200">
                   {currentTurnIndex + 1 < turnOrder.length ? 'Pasa el teléfono.' : 'Listo para empezar.'}
                 </p>
@@ -685,15 +678,15 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
             <section
               ref={resultPanelRef}
-              className="rounded-[2rem] border border-white/10 bg-black/30 p-6 shadow-inner shadow-black/25"
+              className="rounded-[2rem] border border-white/10 bg-black/30 p-4 shadow-inner shadow-black/25 sm:p-6"
             >
               <div
-                className="rounded-[2rem] border border-white/10 bg-white/5 p-6"
+                className="rounded-[2rem] border border-white/10 bg-white/5 p-4 sm:p-6"
                 style={{
                   boxShadow: `0 0 0 1px ${selectedColor}18`,
                 }}
               >
-                <div className="relative mx-auto flex min-h-[32rem] max-w-xl flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
+                <div className="relative mx-auto flex min-h-[22rem] max-w-xl flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-4 sm:min-h-[32rem] sm:p-5">
                   <div
                     className={`absolute inset-0 bg-gradient-to-br ${selectedPanel}`}
                     aria-hidden="true"
@@ -722,7 +715,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                         >
                           <span className="flex items-center gap-2">
                             <FaUsers />
-                            Siguiente
+                            Revelar
                           </span>
                         </LiquidButton>
                       </div>
@@ -774,7 +767,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                         >
                           <span className="flex items-center gap-2">
                             <FaUsers />
-                            {currentTurnIndex + 1 < turnOrder.length ? 'Siguiente' : 'Empezar ronda'}
+                            Siguiente
                           </span>
                         </LiquidButton>
                       </div>
@@ -821,8 +814,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
   if (phase === 'round') {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
-        <div className="fixed left-4 top-4 z-50">
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
           <LiquidButton
             className="rounded-full !px-4 !py-4"
             onClick={(event) => {
@@ -838,12 +831,12 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           </LiquidButton>
         </div>
 
-        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
-            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/25 sm:p-6">
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
-              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Impostor</h1>
+              <h1 className="mt-2 text-3xl font-black sm:text-5xl">Impostor</h1>
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <LiquidButton
@@ -914,10 +907,10 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
             <section
               ref={resultPanelRef}
-              className="rounded-[2rem] border border-white/10 bg-black/30 p-6 shadow-inner shadow-black/25"
+              className="rounded-[2rem] border border-white/10 bg-black/30 p-4 shadow-inner shadow-black/25 sm:p-6"
             >
-              <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-                <div className="relative mx-auto flex min-h-[32rem] max-w-xl flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-5">
+              <div className="rounded-[2rem] border border-white/10 bg-white/5 p-4 sm:p-6">
+                <div className="relative mx-auto flex min-h-[22rem] max-w-xl flex-col items-center justify-center overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-4 sm:min-h-[32rem] sm:p-5">
                   <div
                     className={`absolute inset-0 bg-gradient-to-br ${selectedPanel}`}
                     aria-hidden="true"
@@ -931,7 +924,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                         Ronda en curso
                       </span>
                     </p>
-                    <p className="mt-5 text-6xl font-black text-white">{roundSecondsLeft}</p>
+                    <p className="mt-5 text-5xl font-black text-white sm:text-6xl">{roundSecondsLeft}</p>
                     <p className="mt-3 text-slate-200">Cuando quieras, sigue o vota.</p>
 
                     <div className="mt-6 overflow-hidden rounded-full border border-white/10 bg-black/40">
@@ -1012,8 +1005,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
   if (phase === 'vote') {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
-        <div className="fixed left-4 top-4 z-50">
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
           <LiquidButton
             className="rounded-full !px-4 !py-4"
             onClick={(event) => {
@@ -1029,17 +1022,17 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           </LiquidButton>
         </div>
 
-        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+        <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
-            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/25 sm:p-6">
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
-              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Votación</h1>
+              <h1 className="mt-2 text-3xl font-black sm:text-5xl">Votación</h1>
               <p className="mt-3 max-w-2xl text-slate-200">
                 Selecciona a la persona que crees que es el impostor.
               </p>
 
-              <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-5">
+              <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-4 sm:p-5">
                 <p className="mt-2 text-3xl font-black" style={{ color: selectedColor }}>
                   #{roundIndex}
                 </p>
@@ -1049,9 +1042,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
             <section
               ref={resultPanelRef}
-              className="rounded-[2rem] border border-white/10 bg-black/30 p-6 shadow-inner shadow-black/25"
+              className="rounded-[2rem] border border-white/10 bg-black/30 p-4 shadow-inner shadow-black/25 sm:p-6"
             >
-              <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+              <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 sm:p-6">
                 <p className="text-sm uppercase tracking-[0.45em] text-white/55">Elige un jugador</p>
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
                   {participants.map((participant) => {

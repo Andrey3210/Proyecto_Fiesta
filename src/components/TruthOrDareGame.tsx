@@ -78,8 +78,6 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
   const [truthDeckIndex, setTruthDeckIndex] = useState(0);
   const turnPanelRef = useRef<HTMLDivElement | null>(null);
   const resultPanelRef = useRef<HTMLDivElement | null>(null);
-  const shouldAutoScroll = typeof window !== 'undefined' && window.innerWidth >= 768;
-  const hasScrolledResultRef = useRef(false);
 
   const currentPlayer = participants.find((participant) => participant.id === turnOrder[currentTurnIndex]);
   const selectedCategory = selectedCategoryKey ? truthCategoryMap[selectedCategoryKey] : null;
@@ -137,24 +135,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
     setMode('idle');
     setCurrentTruth('');
     setShotSecondsLeft(shotDuration);
-    hasScrolledResultRef.current = false;
   }, [selectedCategoryKey, selectedCategory?.questions]);
-
-  useEffect(() => {
-    if (mode !== 'truth' || !shouldAutoScroll || hasScrolledResultRef.current) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      resultPanelRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-      hasScrolledResultRef.current = true;
-    }, 120);
-
-    return () => window.clearTimeout(timer);
-  }, [mode, shouldAutoScroll]);
 
   const drawTruth = () => {
     if (!selectedCategory) {
@@ -209,7 +190,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
     setCurrentTruth(drawTruth());
     setShotSecondsLeft(shotDuration);
     window.setTimeout(() => {
-      resultPanelRef.current?.scrollIntoView({
+      turnPanelRef.current?.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
       });
@@ -225,7 +206,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
     setCurrentTruth('SHOT! SHOT! SHOT!');
     setShotSecondsLeft(shotDuration);
     window.setTimeout(() => {
-      resultPanelRef.current?.scrollIntoView({
+      turnPanelRef.current?.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
       });
@@ -234,7 +215,6 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
 
   const selectCategory = (categoryKey: TruthCategoryKey) => {
     setSelectedCategoryKey(categoryKey);
-    hasScrolledResultRef.current = false;
     setShowCategoryChangeWarning(false);
   };
 
@@ -263,8 +243,8 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
 
   if (!selectedCategory) {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
-        <div className="fixed left-4 top-4 z-50">
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
           <LiquidButton
             className="rounded-full !px-4 !py-4"
             onClick={(event) => {
@@ -280,10 +260,10 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
           </LiquidButton>
         </div>
 
-        <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+        <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10">
-            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+            <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/25 sm:p-6">
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
               <h1 className="mt-2 text-4xl font-black sm:text-5xl">Elige una categoría</h1>
               <p className="mt-3 max-w-2xl text-slate-200">
@@ -341,8 +321,8 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
-        <div className="fixed left-4 top-4 z-50">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
           <LiquidButton
             className="rounded-full !px-4 !py-4"
             onClick={(event) => {
@@ -358,10 +338,10 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
           </LiquidButton>
         </div>
 
-      <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+      <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
-        <div className="relative z-10 grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-          <section className="order-last rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25 lg:order-none">
+        <div className="relative z-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+          <section className="order-first rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/25 sm:p-6 lg:order-none">
             <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
             <h1 className="mt-2 text-4xl font-black sm:text-5xl">Verdad o Shot</h1>
 
@@ -447,27 +427,27 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
               </LiquidButton>
             </div>
 
-            <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
-              <p className="mt-2 text-lg text-slate-200">
-                {mode === 'idle' ? 'Selecciona una opción.' : shotCompleted ? '¡Shot tomado!' : ''}
-              </p>
-            </div>
+            {mode === 'shot' && shotCompleted && (
+              <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
+                <p className="mt-2 text-lg text-slate-200">¡Shot tomado!</p>
+              </div>
+            )}
           </section>
 
           <section
             ref={resultPanelRef}
-            className="order-first rounded-[2rem] border border-white/10 bg-black/30 p-6 shadow-inner shadow-black/25 lg:order-none"
+            className="order-last rounded-[2rem] border border-white/10 bg-black/30 p-4 shadow-inner shadow-black/25 sm:p-6 lg:order-none"
           >
             {mode === 'idle' ? (
-              <div className="flex min-h-[32rem] flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-white/15 bg-white/5 p-8 text-center">
+              <div className="flex min-h-[22rem] flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-white/15 bg-white/5 p-6 text-center sm:min-h-[32rem] sm:p-8">
                 <p className="text-3xl">{selectedCategory.emoji}</p>
-                <p className="mt-4 text-3xl font-black">Verdad o Shot</p>
+                <p className="mt-4 text-2xl font-black sm:text-3xl">Verdad o Shot</p>
                 <p className="mt-3 max-w-md text-slate-200">Pulsa una opción para empezar.</p>
               </div>
             ) : (
               <div
                 key={`${mode}-${currentPlayer.id}`}
-                className="app-reveal-focus flex min-h-[32rem] flex-col justify-between rounded-[1.75rem] border border-white/10 bg-white/5 p-6"
+                className="app-reveal-focus flex min-h-[22rem] flex-col justify-between rounded-[1.75rem] border border-white/10 bg-white/5 p-5 sm:min-h-[32rem] sm:p-6"
               >
                 <div>
                   <div className="flex items-center justify-center">
@@ -488,7 +468,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                       </p>
                     ) : (
                       <div className="text-center">
-                        <p className="text-4xl font-black uppercase tracking-[0.3em] text-rose-200 sm:text-5xl">
+                        <p className="text-3xl font-black uppercase tracking-[0.3em] text-rose-200 sm:text-5xl">
                           SHOT! SHOT! SHOT!
                         </p>
                         <p className="mt-4 text-slate-200">
@@ -500,7 +480,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                             style={{ width: progressWidth }}
                           />
                         </div>
-                        <p className="mt-4 text-6xl font-black text-white">{shotSecondsLeft}</p>
+                        <p className="mt-4 text-5xl font-black text-white sm:text-6xl">{shotSecondsLeft}</p>
                         {shotCompleted && <p className="mt-4 text-lg font-semibold text-emerald-300">¡Shot tomado!</p>}
                       </div>
                     )}

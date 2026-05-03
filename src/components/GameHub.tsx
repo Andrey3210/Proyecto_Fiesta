@@ -61,7 +61,7 @@ function GameHub({
 }: GameHubProps) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-transparent text-white">
-      <div className="fixed left-4 top-4 z-50">
+      <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
         <button
           className="rounded-full border border-white/10 bg-slate-950/80 px-5 py-3 text-sm font-semibold shadow-2xl backdrop-blur-xl transition hover:bg-slate-900"
           onClick={(event) => {
