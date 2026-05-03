@@ -10,6 +10,7 @@ export type TruthCategoryKey =
 type TruthCategoryMeta = {
   label: string;
   description: string;
+  emoji: string;
 };
 
 type TruthCategoryDefinition = TruthCategoryMeta & {
@@ -24,24 +25,29 @@ const questionsByCategory = truthQuestionsByCategory as Record<
 
 const categoryMeta: Record<TruthCategoryKey, TruthCategoryMeta> = {
   divertidas: {
-    label: 'Divertidas & para romper el hielo',
-    description: 'Perfectas para empezar el juego y calentar el ambiente.',
+    label: 'Divertidas',
+    description: 'Para romper el hielo y subir el ambiente.',
+    emoji: '🎉',
   },
   comprometidas: {
-    label: 'Comprometidas & profundas',
-    description: 'Para conocerse de verdad. Requieren honestidad brutal.',
+    label: 'Comprometidas',
+    description: 'Más profundas, más sinceras.',
+    emoji: '💬',
   },
   romanticas: {
-    label: 'Románticas & de pareja',
-    description: 'Para parejas o para descubrir sentimientos ocultos.',
+    label: 'Románticas',
+    description: 'Para parejas o crushes.',
+    emoji: '💘',
   },
   atrevidas: {
-    label: 'Atrevidas & picantes',
-    description: 'Solo para mayores de 18. Suben la temperatura del ambiente.',
+    label: 'Atrevidas',
+    description: 'Suben la temperatura rápido.',
+    emoji: '🔥',
   },
   incomodas: {
-    label: 'Incómodas & para valientes',
-    description: 'Las más difíciles de responder honestamente.',
+    label: 'Incómodas',
+    description: 'Solo para valientes.',
+    emoji: '😬',
   },
 };
 

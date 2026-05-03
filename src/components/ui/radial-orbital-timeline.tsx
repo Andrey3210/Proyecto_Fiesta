@@ -107,13 +107,13 @@ export default function RadialOrbitalTimeline({
   return (
     <div
       ref={containerRef}
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4 py-10 pt-24 text-white app-fade-up"
+      className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden px-4 py-6 pt-16 text-white app-fade-up"
       onClick={handleBackgroundClick}
     >
-      <div className="absolute inset-0 bg-black/22" />
+      <div className="absolute inset-0 bg-black/18" />
 
       <div className="relative z-10 w-full max-w-7xl">
-        <div className="mb-8 text-center">
+        <div className="mb-4 text-center">
           <p className="mb-3 text-xs uppercase tracking-[0.5em] text-white/60">
             MondeFan
           </p>
@@ -123,16 +123,16 @@ export default function RadialOrbitalTimeline({
           </p>
         </div>
 
-        <div className="relative flex min-h-[620px] items-center justify-center">
+        <div className="relative flex min-h-[560px] items-center justify-center">
           <div
             ref={orbitRef}
             className="absolute inset-0 flex items-center justify-center"
             style={{ transform: 'translate(0px, 0px)' }}
           >
-            <div className="absolute h-28 w-28 rounded-full bg-gradient-to-br from-fuchsia-500 via-indigo-500 to-cyan-400 opacity-95 shadow-[0_0_90px_rgba(255,255,255,0.3)]" />
-            <div className="absolute h-40 w-40 rounded-full border border-white/12" />
-            <div className="absolute h-72 w-72 rounded-full border border-white/12" />
-            <div className="absolute h-[24rem] w-[24rem] rounded-full border border-white/12" />
+            <div className="absolute h-32 w-32 rounded-full bg-gradient-to-br from-fuchsia-500 via-indigo-500 to-cyan-400 opacity-95 shadow-[0_0_100px_rgba(255,255,255,0.32)]" />
+            <div className="absolute h-44 w-44 rounded-full border border-white/12" />
+            <div className="absolute h-80 w-80 rounded-full border border-white/10" />
+            <div className="absolute h-[26rem] w-[26rem] rounded-full border border-white/10" />
 
             {timelineData.map((item, index) => {
               const position = calculateNodePosition(index, timelineData.length);
@@ -182,18 +182,18 @@ export default function RadialOrbitalTimeline({
 
                   <div
                     className={cn(
-                      'relative flex h-16 w-16 items-center justify-center rounded-full border-2 backdrop-blur-xl transition-all duration-300 sm:h-20 sm:w-20',
+                      'relative flex h-20 w-20 items-center justify-center rounded-full border-2 backdrop-blur-xl transition-all duration-300 sm:h-24 sm:w-24',
                       isExpanded
-                        ? 'border-white bg-white text-slate-950 shadow-[0_0_40px_rgba(255,255,255,0.4)]'
-                        : 'border-white/30 bg-black/55 text-white shadow-[0_0_24px_rgba(255,255,255,0.1)]',
+                        ? 'border-white bg-white text-slate-950 shadow-[0_0_44px_rgba(255,255,255,0.45)]'
+                        : 'border-white/35 bg-black/50 text-white shadow-[0_0_28px_rgba(255,255,255,0.12)]',
                     )}
                   >
-                    <Icon size={22} />
+                    <Icon size={24} />
                   </div>
 
                   <div
                     className={cn(
-                      'absolute left-1/2 top-20 -translate-x-1/2 whitespace-nowrap text-sm font-semibold transition-all duration-300',
+                      'absolute left-1/2 top-24 -translate-x-1/2 whitespace-nowrap text-sm font-semibold transition-all duration-300',
                       isExpanded ? 'scale-110 text-white' : 'text-white/75',
                     )}
                   >
@@ -201,7 +201,7 @@ export default function RadialOrbitalTimeline({
                   </div>
 
                   {isExpanded && (
-                    <Card className="absolute left-1/2 top-28 w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 border-white/10 bg-slate-950/90 shadow-2xl shadow-black/40 backdrop-blur-2xl">
+                    <Card className="absolute left-1/2 top-32 w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 border-white/10 bg-slate-950/90 shadow-2xl shadow-black/40 backdrop-blur-2xl">
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between gap-3">
                           <Badge className={cn('border', getStatusStyles(item.status))}>
@@ -221,7 +221,7 @@ export default function RadialOrbitalTimeline({
                           <div className="mb-2 flex items-center justify-between text-xs text-white/70">
                             <span className="flex items-center gap-1">
                               <Zap size={12} />
-                              Energía
+                              Energ?a
                             </span>
                             <span>{item.energy}%</span>
                           </div>

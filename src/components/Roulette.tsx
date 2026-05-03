@@ -99,22 +99,20 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
       <div className="fixed left-4 top-4 z-50">
-        <LiquidButton
-          className="rounded-full"
-          onClick={(event) => {
-            onButtonPress(event);
-            onBackToHub();
-          }}
-          size="lg"
-          variant="cool"
-          type="button"
-        >
-          <span className="flex items-center gap-2">
+          <LiquidButton
+            className="rounded-full !px-4 !py-4"
+            onClick={(event) => {
+              onButtonPress(event);
+              onBackToHub();
+            }}
+            size="lg"
+            variant="cool"
+            type="button"
+            aria-label="Volver"
+          >
             <FaArrowLeft />
-            Volver
-          </span>
-        </LiquidButton>
-      </div>
+          </LiquidButton>
+        </div>
 
       <div className="w-full max-w-[92rem] overflow-hidden rounded-[2.25rem] border border-white/10 bg-slate-950/80 p-6 shadow-[0_40px_120px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-8">
         <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-500/18 via-sky-500/8 to-black/75" />
@@ -124,7 +122,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
             <p className="mb-3 text-sm uppercase tracking-[0.5em] text-white/80">MondeFan</p>
             <h1 className="text-5xl font-black sm:text-6xl">Ruleta</h1>
             <p className="mt-3 max-w-xl text-slate-100">
-              Una ruleta para elegir a alguien al azar y arrancar el juego.
+              Un giro, un ganador. Rápido, justo y al azar.
             </p>
 
             <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -151,7 +149,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
               ))}
             </div>
 
-            <div className="relative mx-auto mt-10 flex w-full max-w-[min(92vw,38rem)] justify-center">
+            <div className="relative mx-auto mt-10 flex w-full max-w-[min(92vw,34rem)] justify-center">
               <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2">
                 <div className="h-0 w-0 border-l-[22px] border-r-[22px] border-b-[40px] border-l-transparent border-r-transparent border-b-white drop-shadow-[0_8px_18px_rgba(255,255,255,0.55)]" />
               </div>
@@ -198,9 +196,28 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
               size="xxl"
               variant="cool"
               type="button"
-            >
-              {mustSpin ? 'Girando...' : 'Girar'}
-            </LiquidButton>
+              >
+                {mustSpin ? 'Girando...' : 'Girar'}
+              </LiquidButton>
+
+            <div className="mt-8 grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {participants.map((participant) => (
+                <div
+                  key={participant.id}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-3 text-center"
+                >
+                  <p className="truncate text-sm font-semibold text-white">{participant.name}</p>
+                  <ParticipantAvatarBadge
+                    avatar={participant.avatar}
+                    backgroundColor={participant.color}
+                    className="mx-auto mt-2 h-12 w-12"
+                    seed={participant.avatarSeed}
+                    alt={participant.name}
+                    sizeClassName="h-12 w-12"
+                  />
+                </div>
+              ))}
+            </div>
           </section>
 
           <aside ref={resultPanelRef} className="rounded-[2rem] border border-white/10 bg-white/5 p-6 text-center shadow-inner shadow-black/20">
@@ -221,6 +238,16 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
                   {selected.name}
                 </p>
                 <p className="mt-3 text-slate-100">La rueda cayó aquí.</p>
+                <div className="mt-6 flex justify-center">
+                  <ParticipantAvatarBadge
+                    avatar={selected.avatar}
+                    backgroundColor={selected.color}
+                    className="h-20 w-20"
+                    seed={selected.avatarSeed}
+                    alt={selected.name}
+                    sizeClassName="h-20 w-20"
+                  />
+                </div>
               </div>
             ) : (
               <div className="mt-8 rounded-3xl border border-dashed border-white/15 bg-black/20 p-8">

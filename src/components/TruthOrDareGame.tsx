@@ -5,11 +5,6 @@ import type { MouseEvent as ReactMouseEvent } from 'react';
 
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import { ParticipantAvatarBadge } from '@/components/ui/participant-avatar';
-import divertidasImage from '@/assets/truth-divertidas.svg';
-import comprometidasImage from '@/assets/truth-comprometidas.svg';
-import romanticasImage from '@/assets/truth-romanticas.svg';
-import atrevidasImage from '@/assets/truth-atrevidas.svg';
-import incomodasImage from '@/assets/truth-incomodas.svg';
 import {
   truthCategories,
   truthCategoryMap,
@@ -44,33 +39,27 @@ const categoryVisuals: Record<
   {
     accent: string;
     panel: string;
-    image: string;
   }
 > = {
   divertidas: {
     accent: '#f59e0b',
     panel: 'from-amber-500/22 via-orange-500/16 to-rose-500/10',
-    image: divertidasImage,
   },
   comprometidas: {
     accent: '#38bdf8',
     panel: 'from-sky-500/22 via-cyan-500/16 to-slate-500/10',
-    image: comprometidasImage,
   },
   romanticas: {
     accent: '#fb7185',
     panel: 'from-pink-500/22 via-rose-500/16 to-fuchsia-500/10',
-    image: romanticasImage,
   },
   atrevidas: {
     accent: '#a855f7',
     panel: 'from-fuchsia-500/22 via-violet-500/16 to-rose-500/10',
-    image: atrevidasImage,
   },
   incomodas: {
     accent: '#22c55e',
     panel: 'from-emerald-500/22 via-lime-500/16 to-teal-500/10',
-    image: incomodasImage,
   },
 };
 
@@ -219,6 +208,12 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
     setMode('truth');
     setCurrentTruth(drawTruth());
     setShotSecondsLeft(shotDuration);
+    window.setTimeout(() => {
+      resultPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 50);
   };
 
   const startShot = () => {
@@ -229,6 +224,12 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
     setMode('shot');
     setCurrentTruth('SHOT! SHOT! SHOT!');
     setShotSecondsLeft(shotDuration);
+    window.setTimeout(() => {
+      resultPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 50);
   };
 
   const selectCategory = (categoryKey: TruthCategoryKey) => {
@@ -265,7 +266,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
         <div className="fixed left-4 top-4 z-50">
           <LiquidButton
-            className="rounded-full"
+            className="rounded-full !px-4 !py-4"
             onClick={(event) => {
               onButtonPress(event);
               onBackToHub();
@@ -273,11 +274,9 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
             size="lg"
             variant="cool"
             type="button"
+            aria-label="Volver"
           >
-            <span className="flex items-center gap-2">
-              <FaArrowLeft />
-              Volver
-            </span>
+            <FaArrowLeft />
           </LiquidButton>
         </div>
 
@@ -319,25 +318,15 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                         <span className="flex flex-col">
                           <span className="text-lg font-black leading-tight">{category.label}</span>
                           <span className="mt-2 text-sm text-white/75">{category.description}</span>
-                          <span
-                            className="mt-4 h-1 w-24 rounded-full"
-                            style={{
-                              backgroundColor: categoryVisuals[category.key].accent,
-                            }}
-                          />
                         </span>
                         <span
-                          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-black/20 p-2 shadow-inner"
+                          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/20 text-2xl shadow-inner"
                           style={{
                             boxShadow: `0 0 0 1px ${categoryVisuals[category.key].accent}33`,
+                            backgroundColor: `${categoryVisuals[category.key].accent}22`,
                           }}
                         >
-                          <img
-                            alt=""
-                            aria-hidden="true"
-                            className="h-full w-full object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.4)]"
-                            src={categoryVisuals[category.key].image}
-                          />
+                          {category.emoji}
                         </span>
                       </span>
                     </span>
@@ -353,28 +342,26 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
-      <div className="fixed left-4 top-4 z-50">
-        <LiquidButton
-          className="rounded-full"
-          onClick={(event) => {
-            onButtonPress(event);
-            onBackToHub();
-          }}
-          size="lg"
-          variant="cool"
-          type="button"
-        >
-          <span className="flex items-center gap-2">
+        <div className="fixed left-4 top-4 z-50">
+          <LiquidButton
+            className="rounded-full !px-4 !py-4"
+            onClick={(event) => {
+              onButtonPress(event);
+              onBackToHub();
+            }}
+            size="lg"
+            variant="cool"
+            type="button"
+            aria-label="Volver"
+          >
             <FaArrowLeft />
-            Volver
-          </span>
-        </LiquidButton>
-      </div>
+          </LiquidButton>
+        </div>
 
       <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
         <div className="relative z-10 grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
-          <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
+          <section className="order-last rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25 lg:order-none">
             <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
             <h1 className="mt-2 text-4xl font-black sm:text-5xl">Verdad o Shot</h1>
 
@@ -382,9 +369,9 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
               <LiquidButton
                 className="rounded-full !px-4 !py-2 text-sm"
                 onClick={(event) => {
-                    onButtonPress(event);
-                    setShowCategoryChangeWarning(true);
-                  }}
+                  onButtonPress(event);
+                  setShowCategoryChangeWarning(true);
+                }}
                 size="lg"
                 variant="cool"
                 type="button"
@@ -392,13 +379,13 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                 Cambiar categoría
               </LiquidButton>
               <div
-                className="rounded-full border px-4 py-2 text-sm text-white/80"
+                className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm text-white/80"
                 style={{
                   borderColor: `${categoryVisuals[selectedCategory.key].accent}55`,
                   backgroundColor: `${categoryVisuals[selectedCategory.key].accent}12`,
                 }}
               >
-                {selectedCategory.label}
+                <span>{selectedCategory.emoji}</span>
               </div>
             </div>
 
@@ -420,10 +407,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                   <p className="text-3xl font-black" style={{ color: currentPlayer.color }}>
                     {currentPlayer.name}
                   </p>
-                  <p className="mt-1 text-slate-200">
-                    Elige una verdad de {selectedCategory.label.toLowerCase()} o prepárate para el
-                    shot.
-                  </p>
+                  <p className="mt-1 text-slate-200">Elige verdad o shot.</p>
                 </div>
               </div>
             </div>
@@ -464,30 +448,21 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
             </div>
 
             <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
-              <p className="text-sm uppercase tracking-[0.35em] text-white/50">Estado</p>
               <p className="mt-2 text-lg text-slate-200">
-                {mode === 'idle'
-                  ? 'Selecciona una opción para empezar.'
-                  : mode === 'truth'
-                    ? 'Verdad activa.'
-                    : shotCompleted
-                      ? '¡Shot tomado!'
-                      : 'Cuenta regresiva en curso.'}
+                {mode === 'idle' ? 'Selecciona una opción.' : shotCompleted ? '¡Shot tomado!' : ''}
               </p>
             </div>
           </section>
 
           <section
             ref={resultPanelRef}
-            className="rounded-[2rem] border border-white/10 bg-black/30 p-6 shadow-inner shadow-black/25"
+            className="order-first rounded-[2rem] border border-white/10 bg-black/30 p-6 shadow-inner shadow-black/25 lg:order-none"
           >
             {mode === 'idle' ? (
               <div className="flex min-h-[32rem] flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-white/15 bg-white/5 p-8 text-center">
-                <p className="text-sm uppercase tracking-[0.4em] text-white/55">Listos</p>
+                <p className="text-3xl">{selectedCategory.emoji}</p>
                 <p className="mt-4 text-3xl font-black">Verdad o Shot</p>
-                <p className="mt-3 max-w-md text-slate-200">
-                  Aquí verás una pregunta de la categoría elegida o un shot con cronómetro.
-                </p>
+                <p className="mt-3 max-w-md text-slate-200">Pulsa una opción para empezar.</p>
               </div>
             ) : (
               <div
@@ -495,9 +470,17 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                 className="app-reveal-focus flex min-h-[32rem] flex-col justify-between rounded-[1.75rem] border border-white/10 bg-white/5 p-6"
               >
                 <div>
-                  <p className="text-sm uppercase tracking-[0.45em] text-white/55">
-                    {mode === 'truth' ? selectedCategory.label : 'Shot'}
-                  </p>
+                  <div className="flex items-center justify-center">
+                    <span
+                      className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/15 text-2xl"
+                      style={{
+                        backgroundColor: `${categoryVisuals[selectedCategory.key].accent}18`,
+                        color: categoryVisuals[selectedCategory.key].accent,
+                      }}
+                    >
+                      {selectedCategory.emoji}
+                    </span>
+                  </div>
                   <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-black/25 p-6">
                     {mode === 'truth' ? (
                       <p className="text-2xl font-semibold leading-relaxed text-white sm:text-3xl">
@@ -518,11 +501,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                           />
                         </div>
                         <p className="mt-4 text-6xl font-black text-white">{shotSecondsLeft}</p>
-                        {shotCompleted && (
-                          <p className="mt-4 text-lg font-semibold text-emerald-300">
-                            ¡Shot tomado!
-                          </p>
-                        )}
+                        {shotCompleted && <p className="mt-4 text-lg font-semibold text-emerald-300">¡Shot tomado!</p>}
                       </div>
                     )}
                   </div>
@@ -555,7 +534,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
             <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 p-6 text-center text-white shadow-2xl">
                 <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
                 <h2 className="mt-3 text-2xl font-black">Cambiar categoría</h2>
-              <p className="mt-3 text-slate-200">Si cambias la categoría, la ronda actual se reiniciará.</p>
+                <p className="mt-3 text-slate-200">Si cambias la categoría, la ronda actual se reiniciará.</p>
               <div className="mt-6 flex gap-3">
                 <button
                   className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"

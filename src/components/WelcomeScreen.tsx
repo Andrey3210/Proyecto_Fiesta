@@ -167,9 +167,6 @@ function WelcomeScreen({
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/65" />
             <div className="relative z-10 flex flex-col justify-between">
               <h2 className="text-2xl font-bold">Listos para jugar</h2>
-              <p className="mt-2 text-slate-200">
-                Los participantes se guardan mientras cambias entre pantallas.
-              </p>
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                   <p className="text-xs uppercase tracking-[0.25em] text-slate-300/70">

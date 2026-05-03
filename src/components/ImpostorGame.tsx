@@ -5,7 +5,6 @@ import {
   FaClock,
   FaEye,
   FaEyeSlash,
-  FaMask,
   FaRedoAlt,
   FaUsers,
 } from 'react-icons/fa';
@@ -78,10 +77,17 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
     ? participants.find((participant) => participant.id === votedPlayerId)
     : null;
   const isCurrentImpostor = currentPlayer?.id === impostorId;
-  const canStartMatch = participants.length >= 3 && selectedCategory !== null;
   const activeVotePlayer = selectedVoteId
     ? participants.find((participant) => participant.id === selectedVoteId)
     : null;
+  const scrollResultToTop = () => {
+    window.setTimeout(() => {
+      resultPanelRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 50);
+  };
 
   const resetMatchState = () => {
     setPhase('setup');
@@ -195,33 +201,40 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
     if (nextIndex < turnOrder.length) {
       setCurrentTurnIndex(nextIndex);
       setRevealStep('covered');
+      scrollResultToTop();
       return;
     }
 
     setPhase('round');
     setRoundSecondsLeft(roundDuration);
     setRevealStep('covered');
+    scrollResultToTop();
   };
 
   const handleContinueRound = () => {
     setRoundIndex((value) => value + 1);
     setRoundSecondsLeft(roundDuration);
+    scrollResultToTop();
   };
 
   const handleGoToVote = () => {
     setSelectedVoteId(null);
     setPhase('vote');
+    scrollResultToTop();
   };
 
-  const handleVoteConfirm = () => {
-    if (!selectedVoteId || !impostorId) {
+  const handleVoteForPlayer = (participantId: string) => {
+    setSelectedVoteId(participantId);
+
+    if (!impostorId) {
       return;
     }
 
-    const impostorWasSelected = selectedVoteId === impostorId;
+    const impostorWasSelected = participantId === impostorId;
     setVoteResult(impostorWasSelected ? 'group-wins' : 'impostor-wins');
-    setVotedPlayerId(selectedVoteId);
+    setVotedPlayerId(participantId);
     setPhase('summary');
+    scrollResultToTop();
   };
 
   const selectedColor = selectedCategory?.accent ?? '#38bdf8';
@@ -233,7 +246,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
         <div className="fixed left-4 top-4 z-50">
           <LiquidButton
-            className="rounded-full"
+            className="rounded-full !px-4 !py-4"
             onClick={(event) => {
               onButtonPress(event);
               onBackToHub();
@@ -241,11 +254,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
             size="lg"
             variant="cool"
             type="button"
+            aria-label="Volver"
           >
-            <span className="flex items-center gap-2">
-              <FaArrowLeft />
-              Volver
-            </span>
+            <FaArrowLeft />
           </LiquidButton>
         </div>
 
@@ -256,8 +267,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
               <h1 className="mt-2 text-4xl font-black sm:text-5xl">Impostor</h1>
               <p className="mt-3 max-w-2xl text-slate-200">
-                Elige una categoría, reparte los roles uno por uno y luego empieza la ronda con
-                tiempo limite. Cuando termine, votan por una persona.
+                Elige una categoría y empieza. Sin pasos extra.
               </p>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -303,12 +313,13 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                           />
                         </span>
                         <span
-                          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-black/20 p-2 shadow-inner"
+                          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/20 text-2xl shadow-inner"
                           style={{
                             boxShadow: `0 0 0 1px ${category.accent}33`,
+                            backgroundColor: `${category.accent}18`,
                           }}
                         >
-                          <FaMask className="text-2xl" />
+                          {category.emoji}
                         </span>
                       </span>
                     </span>
@@ -323,15 +334,25 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     boxShadow: selectedCategory ? `0 0 0 1px ${selectedColor}22` : undefined,
                   }}
                 >
-                  <p className="text-sm uppercase tracking-[0.35em] text-white/50">Categoria</p>
+                  <p className="text-sm uppercase tracking-[0.35em] text-white/50">Categoría</p>
                   {selectedCategory ? (
                     <>
-                      <p className="mt-2 text-2xl font-black" style={{ color: selectedColor }}>
-                        {selectedCategory.label}
-                      </p>
+                      <div className="mt-2 flex items-center gap-3">
+                        <span
+                          className="flex h-12 w-12 items-center justify-center rounded-full border border-white/15 text-2xl"
+                          style={{
+                            backgroundColor: `${selectedColor}18`,
+                          }}
+                        >
+                          {selectedCategory.emoji}
+                        </span>
+                        <p className="text-2xl font-black" style={{ color: selectedColor }}>
+                          {selectedCategory.label}
+                        </p>
+                      </div>
                       <p className="mt-2 text-slate-200">{selectedCategory.description}</p>
                       <p className="mt-4 text-sm text-white/70">
-                        {selectedCategory.words.length} secretos listos para la ronda.
+                        {selectedCategory.words.length} palabras listas.
                       </p>
                     </>
                   ) : (
@@ -377,22 +398,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     <p className="mt-1 text-xs text-slate-400">Necesitas al menos 3 para empezar.</p>
                   </div>
 
-                  <LiquidButton
-                    className="mt-5 w-full"
-                    disabled={!canStartMatch}
-                    onClick={(event) => {
-                      onButtonPress(event);
-                      startMatch();
-                    }}
-                    size="xxl"
-                    variant="cool"
-                    type="button"
-                  >
-                    <span className="flex items-center gap-2">
-                      <FaMask />
-                      Repartir roles
-                    </span>
-                  </LiquidButton>
                 </div>
               </div>
             </section>
@@ -410,7 +415,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
         <div className="fixed left-4 top-4 z-50">
           <LiquidButton
-            className="rounded-full"
+            className="rounded-full !px-4 !py-4"
             onClick={(event) => {
               onButtonPress(event);
               onBackToHub();
@@ -418,11 +423,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
             size="lg"
             variant="cool"
             type="button"
+            aria-label="Volver"
           >
-            <span className="flex items-center gap-2">
-              <FaArrowLeft />
-              Volver
-            </span>
+            <FaArrowLeft />
           </LiquidButton>
         </div>
 
@@ -433,7 +436,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
               <h1 className="mt-2 text-4xl font-black sm:text-5xl">Ronda terminada</h1>
               <p className="mt-3 text-slate-200">
-                La categoría era <span className="font-semibold">{selectedCategory?.label ?? 'Categoría'}</span>.
+                La categoría era <span className="font-semibold">{selectedCategory?.emoji ?? '🎭'}</span>.
               </p>
 
               <div
@@ -601,7 +604,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
         <div className="fixed left-4 top-4 z-50">
           <LiquidButton
-            className="rounded-full"
+            className="rounded-full !px-4 !py-4"
             onClick={(event) => {
               onButtonPress(event);
               onBackToHub();
@@ -609,11 +612,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
             size="lg"
             variant="cool"
             type="button"
+            aria-label="Volver"
           >
-            <span className="flex items-center gap-2">
-              <FaArrowLeft />
-              Volver
-            </span>
+            <FaArrowLeft />
           </LiquidButton>
         </div>
 
@@ -638,13 +639,13 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   Cambiar categoría
                 </LiquidButton>
                 <div
-                  className="rounded-full border px-4 py-2 text-sm text-white/80"
+                  className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm text-white/80"
                   style={{
                     borderColor: `${selectedColor}55`,
                     backgroundColor: `${selectedColor}12`,
                   }}
                 >
-                  {selectedCategory?.label ?? 'Sin categoría'}
+                  <span>{selectedCategory?.emoji ?? '🎭'}</span>
                 </div>
               </div>
 
@@ -669,46 +670,15 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <button
-                  className={`rounded-[1.5rem] border px-4 py-4 text-left transition ${
-                    showHint
-                      ? 'border-emerald-400/40 bg-emerald-500/10 text-white'
-                      : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'
-                  }`}
-                  onClick={(event) => {
-                    onButtonPress(event);
-                    setShowHint((value) => !value);
-                  }}
-                  type="button"
-                >
-                  <span className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.3em]">
-                    {showHint ? <FaEye /> : <FaEyeSlash />}
-                    Pista
-                  </span>
-                  <span className="mt-2 block text-sm text-slate-200">
-                    {showHint
-                      ? 'Activa para mostrar una pista solo al impostor.'
-                      : 'Desactivada para jugar más difícil.'}
-                  </span>
-                </button>
-
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
-                  <p className="text-sm uppercase tracking-[0.3em] text-white/50">Revelacion</p>
-                  <p className="mt-2 text-sm text-slate-200">
-                    {currentTurnIndex + 1} de {turnOrder.length}
-                  </p>
-                </div>
+              <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
+                <p className="mt-2 text-sm text-slate-200">
+                  {currentTurnIndex + 1} de {turnOrder.length}
+                </p>
               </div>
 
               <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
-                <p className="text-sm uppercase tracking-[0.35em] text-white/50">Estado</p>
                 <p className="mt-2 text-lg text-slate-200">
-                  {revealStep === 'covered'
-                    ? 'Muestra el papel de este jugador.'
-                    : currentTurnIndex + 1 < turnOrder.length
-                      ? 'Pulsa siguiente para pasar al próximo jugador.'
-                      : 'Ya todos vieron su papel. Ahora puede empezar la ronda.'}
+                  {currentTurnIndex + 1 < turnOrder.length ? 'Pasa el teléfono.' : 'Listo para empezar.'}
                 </p>
               </div>
             </section>
@@ -734,14 +704,12 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     <div className="relative z-10 mt-4 flex w-full flex-col items-center">
                       <div className="rounded-[2rem] border border-white/10 bg-black/25 px-6 py-8 text-center">
                         <p className="text-sm uppercase tracking-[0.45em] text-white/55">
-                          Pasa el teléfono
+                          {selectedCategory?.emoji ?? '🎭'}
                         </p>
                         <p className="mt-5 text-3xl font-black" style={{ color: selectedColor }}>
                           {currentPlayer.name}
                         </p>
-                        <p className="mt-4 text-slate-200">
-                          Solo esta persona puede ver su secreto.
-                        </p>
+                        <p className="mt-4 text-slate-200">Solo esta persona lo ve.</p>
                       </div>
 
                       <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row">
@@ -754,7 +722,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                         >
                           <span className="flex items-center gap-2">
                             <FaUsers />
-                            Ver mi papel
+                            Siguiente
                           </span>
                         </LiquidButton>
                       </div>
@@ -763,15 +731,18 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     <div className="relative z-10 mt-4 flex w-full flex-col items-center">
                       <div className="rounded-[2rem] border border-white/10 bg-black/25 px-6 py-8 text-center">
                         <p className="text-sm uppercase tracking-[0.45em] text-white/55">
-                          {isCurrentImpostor ? 'Tu papel' : 'Tu palabra'}
+                          {selectedCategory?.emoji ?? '🎭'}
                         </p>
-                        <p className="mt-5 text-3xl font-black" style={{ color: selectedColor }}>
+                        <p
+                          className="mt-5 text-3xl font-black"
+                          style={{ color: isCurrentImpostor ? '#ef4444' : selectedColor }}
+                        >
                           {isCurrentImpostor ? 'Eres el impostor' : secretItem.answer}
                         </p>
                         <p className="mt-4 text-slate-200">
                           {isCurrentImpostor
-                            ? 'Tu tarea es escuchar, mirar y no delatarte.'
-                            : 'No digas esta palabra en voz alta hasta que termine la ronda.'}
+                            ? 'Escucha y no te delates.'
+                            : 'No digas la palabra en voz alta.'}
                         </p>
                         {isCurrentImpostor && showHint && (
                           <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-4">
@@ -783,12 +754,12 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                         )}
                         {isCurrentImpostor && !showHint && (
                           <div className="mt-6 rounded-3xl border border-amber-400/30 bg-amber-500/10 p-4 text-amber-100">
-                            La pista fue desactivada al inicio de la partida.
+                            Pista apagada.
                           </div>
                         )}
                         {!isCurrentImpostor && (
                           <div className="mt-6 rounded-3xl border border-emerald-400/30 bg-emerald-500/10 p-4 text-emerald-100">
-                            Esta palabra la comparte todo el grupo menos el impostor.
+                            Palabra del grupo.
                           </div>
                         )}
                       </div>
@@ -853,7 +824,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
         <div className="fixed left-4 top-4 z-50">
           <LiquidButton
-            className="rounded-full"
+            className="rounded-full !px-4 !py-4"
             onClick={(event) => {
               onButtonPress(event);
               onBackToHub();
@@ -861,11 +832,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
             size="lg"
             variant="cool"
             type="button"
+            aria-label="Volver"
           >
-            <span className="flex items-center gap-2">
-              <FaArrowLeft />
-              Volver
-            </span>
+            <FaArrowLeft />
           </LiquidButton>
         </div>
 
@@ -890,13 +859,13 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   Cambiar categoría
                 </LiquidButton>
                 <div
-                  className="rounded-full border px-4 py-2 text-sm text-white/80"
+                  className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm text-white/80"
                   style={{
                     borderColor: `${selectedColor}55`,
                     backgroundColor: `${selectedColor}12`,
                   }}
                 >
-                  {selectedCategory?.label ?? 'Sin categoría'}
+                  <span>{selectedCategory?.emoji ?? '🎭'}</span>
                 </div>
               </div>
 
@@ -937,11 +906,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
               </div>
 
               <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-5">
-                <p className="text-sm uppercase tracking-[0.35em] text-white/50">Estado</p>
                 <p className="mt-2 text-lg text-slate-200">
-                  {roundSecondsLeft > 0
-                    ? 'Debatan y observen. Pueden votar o seguir con otra ronda sin esperar al final.'
-                    : 'El tiempo terminó. Ahora pueden votar o seguir con otra ronda.'}
+                  {roundSecondsLeft > 0 ? 'Debatan y observen.' : 'Pueden votar o seguir.'}
                 </p>
               </div>
             </section>
@@ -966,10 +932,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                       </span>
                     </p>
                     <p className="mt-5 text-6xl font-black text-white">{roundSecondsLeft}</p>
-                    <p className="mt-3 text-slate-200">
-                      Cuando el contador llegue a cero, decide si seguir una ronda más o pasar a
-                      votar.
-                    </p>
+                    <p className="mt-3 text-slate-200">Cuando quieras, sigue o vota.</p>
 
                     <div className="mt-6 overflow-hidden rounded-full border border-white/10 bg-black/40">
                       <div
@@ -1007,10 +970,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                         </span>
                       </LiquidButton>
                     </div>
-
-                    <p className="mt-4 text-sm text-slate-300">
-                      Puedes votar o seguir con otra ronda cuando quieras.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -1056,7 +1015,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
         <div className="fixed left-4 top-4 z-50">
           <LiquidButton
-            className="rounded-full"
+            className="rounded-full !px-4 !py-4"
             onClick={(event) => {
               onButtonPress(event);
               onBackToHub();
@@ -1064,11 +1023,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
             size="lg"
             variant="cool"
             type="button"
+            aria-label="Volver"
           >
-            <span className="flex items-center gap-2">
-              <FaArrowLeft />
-              Volver
-            </span>
+            <FaArrowLeft />
           </LiquidButton>
         </div>
 
@@ -1079,17 +1036,14 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
               <h1 className="mt-2 text-4xl font-black sm:text-5xl">Votación</h1>
               <p className="mt-3 max-w-2xl text-slate-200">
-                Selecciona a la persona que crees que es el impostor y confirma tu voto.
+                Selecciona a la persona que crees que es el impostor.
               </p>
 
               <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-5">
-                <p className="text-sm uppercase tracking-[0.35em] text-white/50">Ronda</p>
                 <p className="mt-2 text-3xl font-black" style={{ color: selectedColor }}>
                   #{roundIndex}
                 </p>
-                <p className="mt-2 text-slate-200">
-                  Si votan al impostor, ganan todos los demás. Si se equivocan, gana el impostor.
-                </p>
+                <p className="mt-2 text-slate-200">Si votan al impostor, ganan los demás.</p>
               </div>
             </section>
 
@@ -1109,7 +1063,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                         className="rounded-3xl border border-white/10 bg-black/25 p-4 text-left transition hover:-translate-y-0.5 hover:bg-white/8"
                         onClick={(event) => {
                           onButtonPress(event);
-                          setSelectedVoteId(participant.id);
+                          handleVoteForPlayer(participant.id);
                         }}
                         type="button"
                         style={{
@@ -1136,19 +1090,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <LiquidButton
                     className="w-full"
-                    disabled={!selectedVoteId}
-                    onClick={(event) => {
-                      onButtonPress(event);
-                      handleVoteConfirm();
-                    }}
-                    size="xxl"
-                    variant="cool"
-                    type="button"
-                  >
-                    Confirmar voto
-                  </LiquidButton>
-                  <LiquidButton
-                    className="w-full"
                     onClick={(event) => {
                       onButtonPress(event);
                       setPhase('round');
@@ -1164,7 +1105,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
                 {activeVotePlayer && (
                   <p className="mt-4 text-sm text-slate-300">
-                    Votaras por <span className="font-semibold">{activeVotePlayer.name}</span>.
+                    Votarás por <span className="font-semibold">{activeVotePlayer.name}</span>.
                   </p>
                 )}
               </div>
