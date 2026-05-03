@@ -22,7 +22,7 @@ const timelineData: TimelineItem[] = [
     id: 1,
     title: 'Ruleta',
     date: 'Jugar ahora',
-    content: 'Una ruleta real para elegir a alguien al azar y empezar la fiesta.',
+    content: 'Gira para elegir a alguien al azar y arrancar la fiesta de una vez.',
     category: 'Ruleta',
     icon: () => <span className="text-xl">🎡</span>,
     relatedIds: [2, 3],
@@ -33,7 +33,7 @@ const timelineData: TimelineItem[] = [
     id: 2,
     title: 'Verdad o Shot',
     date: 'Jugar ahora',
-    content: 'Turnos en orden con preguntas claras y shots si toca.',
+    content: 'Turnos rápidos con verdades, shots y un ritmo que no se corta.',
     category: 'Verdad o Shot',
     icon: () => <span className="text-xl">🍻</span>,
     relatedIds: [1, 3],
@@ -44,7 +44,7 @@ const timelineData: TimelineItem[] = [
     id: 3,
     title: 'Impostor',
     date: 'Jugar ahora',
-    content: 'Bolsa secreta, pistas opcionales y un impostor tratando de pasar desapercibido.',
+    content: 'Reparte roles, revela palabras y descubre al impostor antes de votar.',
     category: 'Impostor',
     icon: FaMask,
     relatedIds: [1, 2],
@@ -79,7 +79,7 @@ function GameHub({
 
       <RadialOrbitalTimeline
         activeId={null}
-        subtitle={`Participantes listos: ${participants.length}. Toca un nodo para entrar.`}
+        subtitle={`Participantes listos: ${participants.length}. Toca un juego para empezar.`}
         timelineData={timelineData}
         title="Juegos de Fiesta"
         onItemSelect={(item) => {

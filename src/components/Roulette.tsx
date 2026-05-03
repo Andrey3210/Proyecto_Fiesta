@@ -124,12 +124,12 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
             <p className="mb-3 text-sm uppercase tracking-[0.5em] text-white/80">MondeFan</p>
             <h1 className="text-5xl font-black sm:text-6xl">Ruleta</h1>
             <p className="mt-3 max-w-xl text-slate-100">
-              Una ruleta mÃ¡s viva, mÃ¡s brillante y mucho mÃ¡s fÃ¡cil de leer.
+              Una ruleta para elegir a alguien al azar y arrancar el juego.
             </p>
 
             <div className="mt-6 flex flex-wrap justify-center gap-2">
               {[
-                { key: 'agile', label: 'Ãgil' },
+                { key: 'agile', label: 'Ágil' },
                 { key: 'normal', label: 'Normal' },
                 { key: 'smooth', label: 'Suave' },
               ].map((option) => (
@@ -151,12 +151,12 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
               ))}
             </div>
 
-            <div className="relative mt-10 w-full max-w-[min(92vw,42rem)]">
+            <div className="relative mx-auto mt-10 flex w-full max-w-[min(92vw,38rem)] justify-center">
               <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2">
                 <div className="h-0 w-0 border-l-[22px] border-r-[22px] border-b-[40px] border-l-transparent border-r-transparent border-b-white drop-shadow-[0_8px_18px_rgba(255,255,255,0.55)]" />
               </div>
 
-              <div className="relative rounded-full border border-white/15 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.14),rgba(15,23,42,0.95)_55%,rgba(0,0,0,0.9)_100%)] p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_0_110px_rgba(255,255,255,0.12),0_50px_140px_rgba(0,0,0,0.6)]">
+              <div className="relative mx-auto rounded-full border border-white/15 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.14),rgba(15,23,42,0.95)_55%,rgba(0,0,0,0.9)_100%)] p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_0_110px_rgba(255,255,255,0.12),0_50px_140px_rgba(0,0,0,0.6)]">
                 <div className="pointer-events-none absolute inset-2 rounded-full border border-white/15 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.22),rgba(255,255,255,0.03)_34%,rgba(0,0,0,0.12)_100%)]" />
                 <div className="relative scale-[1.02] sm:scale-[1.06]">
                   <Wheel
@@ -185,7 +185,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
                     spinDuration={spinDurationByProfile[spinProfile]}
                     startingOptionIndex={0}
                     textColors={['#ffffff']}
-                    textDistance={84}
+                    textDistance={76}
                   />
                 </div>
               </div>
@@ -220,7 +220,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
                 <p className="mt-5 text-3xl font-black" style={{ color: selected.color }}>
                   {selected.name}
                 </p>
-                <p className="mt-3 text-slate-100">La rueda cayÃ³ aquÃ­.</p>
+                <p className="mt-3 text-slate-100">La rueda cayó aquí.</p>
               </div>
             ) : (
               <div className="mt-8 rounded-3xl border border-dashed border-white/15 bg-black/20 p-8">

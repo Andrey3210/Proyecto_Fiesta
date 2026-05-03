@@ -40,7 +40,8 @@ export default function RadialOrbitalTimeline({
 }: RadialOrbitalTimelineProps) {
   const [expandedId, setExpandedId] = useState<number | null>(activeId);
   const [rotationAngle, setRotationAngle] = useState(0);
-  const [autoRotate, setAutoRotate] = useState(true);
+  const [autoRotate, setAutoRotate] = useState(false);
+  const [canAutoRotate, setCanAutoRotate] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const orbitRef = useRef<HTMLDivElement>(null);
   const [radius, setRadius] = useState(170);
@@ -51,8 +52,8 @@ export default function RadialOrbitalTimeline({
     }
 
     const interval = window.setInterval(() => {
-      setRotationAngle((current) => (current + 0.12) % 360);
-    }, 24);
+      setRotationAngle((current) => (current + 0.08) % 360);
+    }, 32);
 
     return () => window.clearInterval(interval);
   }, [autoRotate]);
@@ -60,13 +61,15 @@ export default function RadialOrbitalTimeline({
   const handleBackgroundClick = (event: ReactMouseEvent<HTMLDivElement>) => {
     if (event.target === containerRef.current || event.target === orbitRef.current) {
       setExpandedId(null);
-      setAutoRotate(true);
+      setAutoRotate(canAutoRotate);
     }
   };
 
   useEffect(() => {
     const updateRadius = () => {
-      setRadius(window.innerWidth < 640 ? 122 : 190);
+      setCanAutoRotate(window.innerWidth >= 768);
+      setAutoRotate(window.innerWidth >= 768);
+      setRadius(window.innerWidth < 640 ? 138 : 216);
     };
 
     updateRadius();
@@ -81,7 +84,7 @@ export default function RadialOrbitalTimeline({
     const x = radius * Math.cos(radian);
     const y = radius * Math.sin(radian);
     const zIndex = Math.round(100 + 50 * Math.cos(radian));
-    const opacity = Math.max(0.45, 0.55 + 0.45 * ((1 + Math.sin(radian)) / 2));
+    const opacity = Math.max(0.72, 0.78 + 0.22 * ((1 + Math.sin(radian)) / 2));
 
     return { x, y, zIndex, opacity };
   };
@@ -107,27 +110,29 @@ export default function RadialOrbitalTimeline({
       className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4 py-10 pt-24 text-white app-fade-up"
       onClick={handleBackgroundClick}
     >
-      <div className="absolute inset-0 bg-black/35" />
+      <div className="absolute inset-0 bg-black/22" />
 
-      <div className="relative z-10 w-full max-w-6xl">
+      <div className="relative z-10 w-full max-w-7xl">
         <div className="mb-8 text-center">
           <p className="mb-3 text-xs uppercase tracking-[0.5em] text-white/60">
             MondeFan
           </p>
-          <h1 className="text-4xl font-black sm:text-5xl">{title}</h1>
-          <p className="mt-3 text-sm text-slate-200 sm:text-base">{subtitle}</p>
+          <h1 className="text-5xl font-black sm:text-6xl">{title}</h1>
+          <p className="mx-auto mt-3 max-w-3xl text-sm text-slate-100/90 sm:text-base">
+            {subtitle}
+          </p>
         </div>
 
-        <div className="relative flex min-h-[540px] items-center justify-center">
+        <div className="relative flex min-h-[620px] items-center justify-center">
           <div
             ref={orbitRef}
             className="absolute inset-0 flex items-center justify-center"
             style={{ transform: 'translate(0px, 0px)' }}
           >
-            <div className="absolute h-24 w-24 rounded-full bg-gradient-to-br from-fuchsia-500 via-indigo-500 to-cyan-400 opacity-90 shadow-[0_0_70px_rgba(255,255,255,0.25)]" />
-            <div className="absolute h-36 w-36 rounded-full border border-white/10" />
-            <div className="absolute h-64 w-64 rounded-full border border-white/10" />
-            <div className="absolute h-[22rem] w-[22rem] rounded-full border border-white/10" />
+            <div className="absolute h-28 w-28 rounded-full bg-gradient-to-br from-fuchsia-500 via-indigo-500 to-cyan-400 opacity-95 shadow-[0_0_90px_rgba(255,255,255,0.3)]" />
+            <div className="absolute h-40 w-40 rounded-full border border-white/12" />
+            <div className="absolute h-72 w-72 rounded-full border border-white/12" />
+            <div className="absolute h-[24rem] w-[24rem] rounded-full border border-white/12" />
 
             {timelineData.map((item, index) => {
               const position = calculateNodePosition(index, timelineData.length);
@@ -177,18 +182,18 @@ export default function RadialOrbitalTimeline({
 
                   <div
                     className={cn(
-                      'relative flex h-14 w-14 items-center justify-center rounded-full border-2 backdrop-blur-xl transition-all duration-300',
+                      'relative flex h-16 w-16 items-center justify-center rounded-full border-2 backdrop-blur-xl transition-all duration-300 sm:h-20 sm:w-20',
                       isExpanded
-                        ? 'border-white bg-white text-slate-950 shadow-[0_0_30px_rgba(255,255,255,0.35)]'
-                        : 'border-white/25 bg-black/65 text-white',
+                        ? 'border-white bg-white text-slate-950 shadow-[0_0_40px_rgba(255,255,255,0.4)]'
+                        : 'border-white/30 bg-black/55 text-white shadow-[0_0_24px_rgba(255,255,255,0.1)]',
                     )}
                   >
-                    <Icon size={20} />
+                    <Icon size={22} />
                   </div>
 
                   <div
                     className={cn(
-                      'absolute left-1/2 top-16 -translate-x-1/2 whitespace-nowrap text-sm font-semibold transition-all duration-300',
+                      'absolute left-1/2 top-20 -translate-x-1/2 whitespace-nowrap text-sm font-semibold transition-all duration-300',
                       isExpanded ? 'scale-110 text-white' : 'text-white/75',
                     )}
                   >
@@ -196,7 +201,7 @@ export default function RadialOrbitalTimeline({
                   </div>
 
                   {isExpanded && (
-                    <Card className="absolute left-1/2 top-24 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 border-white/10 bg-slate-950/90 shadow-2xl shadow-black/40 backdrop-blur-2xl">
+                    <Card className="absolute left-1/2 top-28 w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 border-white/10 bg-slate-950/90 shadow-2xl shadow-black/40 backdrop-blur-2xl">
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between gap-3">
                           <Badge className={cn('border', getStatusStyles(item.status))}>

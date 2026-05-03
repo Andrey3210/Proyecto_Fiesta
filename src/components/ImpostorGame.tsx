@@ -33,6 +33,7 @@ type RevealStep = 'covered' | 'shown';
 type VoteResult = 'impostor-wins' | 'group-wins' | null;
 type PendingCategoryChange =
   | { kind: 'clear' }
+  | { kind: 'insufficient' }
   | { kind: 'switch'; nextKey: ImpostorCategoryKey };
 
 const shuffleList = <T,>(values: readonly T[]) => {
@@ -78,7 +79,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
     : null;
   const isCurrentImpostor = currentPlayer?.id === impostorId;
   const canStartMatch = participants.length >= 3 && selectedCategory !== null;
-  const roundFinished = phase === 'round' && roundSecondsLeft === 0;
   const activeVotePlayer = selectedVoteId
     ? participants.find((participant) => participant.id === selectedVoteId)
     : null;
@@ -156,15 +156,16 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
     return () => window.clearTimeout(timer);
   }, [phase, currentTurnIndex, roundIndex, roundSecondsLeft]);
 
-  const startMatch = () => {
-    if (!selectedCategory || participants.length < 3) {
+  const startMatch = (categoryKey = selectedCategoryKey) => {
+    const category = categoryKey ? impostorCategoryMap[categoryKey] : null;
+
+    if (!category || participants.length < 3) {
       return;
     }
 
     const shuffledParticipants = shuffleList(participants.map((participant) => participant.id));
     const impostorIndex = Math.floor(Math.random() * shuffledParticipants.length);
-    const pickedSecret =
-      selectedCategory.words[Math.floor(Math.random() * selectedCategory.words.length)] ?? null;
+    const pickedSecret = category.words[Math.floor(Math.random() * category.words.length)] ?? null;
 
     if (!pickedSecret) {
       return;
@@ -203,19 +204,11 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   };
 
   const handleContinueRound = () => {
-    if (!roundFinished) {
-      return;
-    }
-
     setRoundIndex((value) => value + 1);
     setRoundSecondsLeft(roundDuration);
   };
 
   const handleGoToVote = () => {
-    if (!roundFinished) {
-      return;
-    }
-
     setSelectedVoteId(null);
     setPhase('vote');
   };
@@ -263,7 +256,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
               <h1 className="mt-2 text-4xl font-black sm:text-5xl">Impostor</h1>
               <p className="mt-3 max-w-2xl text-slate-200">
-                Elige una categoria, reparte los roles uno por uno y luego empieza la ronda con
+                Elige una categoría, reparte los roles uno por uno y luego empieza la ronda con
                 tiempo limite. Cuando termine, votan por una persona.
               </p>
 
@@ -280,8 +273,13 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                         return;
                       }
 
+                      if (participants.length < 3) {
+                        setPendingCategoryChange({ kind: 'insufficient' });
+                        return;
+                      }
+
                       setSelectedCategoryKey(category.key);
-                      resetMatchState();
+                      startMatch(category.key);
                     }}
                     type="button"
                   >
@@ -338,7 +336,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     </>
                   ) : (
                     <>
-                      <p className="mt-2 text-2xl font-black text-white">Sin categoria aun</p>
+                      <p className="mt-2 text-2xl font-black text-white">Sin categoría aún</p>
                       <p className="mt-2 text-slate-200">
                         Selecciona una de las tarjetas de arriba para preparar la partida.
                       </p>
@@ -367,7 +365,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     <span className="mt-2 block text-sm text-slate-200">
                       {showHint
                         ? 'Activa para que el impostor vea una pista extra.'
-                        : 'Desactivada para jugar mas dificil.'}
+                        : 'Desactivada para jugar más difícil.'}
                     </span>
                   </button>
 
@@ -406,7 +404,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
   if (phase === 'summary') {
     const resultTitle =
-      voteResult === 'group-wins' ? 'Ganaron los demas' : 'Gano el impostor';
+      voteResult === 'group-wins' ? 'Ganaron los demás' : 'Ganó el impostor';
 
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-4 py-10 pt-20 font-fiesta text-white app-fade-up sm:pt-24">
@@ -435,7 +433,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
               <h1 className="mt-2 text-4xl font-black sm:text-5xl">Ronda terminada</h1>
               <p className="mt-3 text-slate-200">
-                La categoria era <span className="font-semibold">{selectedCategory?.label ?? 'Categoria'}</span>.
+                La categoría era <span className="font-semibold">{selectedCategory?.label ?? 'Categoría'}</span>.
               </p>
 
               <div
@@ -450,7 +448,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                 </p>
                 <p className="mt-3 text-slate-200">
                   {voteResult === 'group-wins'
-                    ? 'El voto dio con el impostor. Ganaron todos los demas.'
+                    ? 'El voto dio con el impostor. Ganaron todos los demás.'
                     : 'El voto fallo. El impostor se queda con la ronda.'}
                 </p>
               </div>
@@ -495,7 +493,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   variant="cool"
                   type="button"
                 >
-                  Elegir categoria
+                  Elegir categoría
                 </LiquidButton>
               </div>
             </section>
@@ -545,10 +543,12 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
             <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 px-4 backdrop-blur-md">
               <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-center text-white shadow-2xl">
                 <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
-                <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
-                <p className="mt-3 text-slate-200">
-                  Si cambias la categoria, se reiniciara la partida actual.
-                </p>
+                <h2 className="mt-3 text-2xl font-black">Cambiar categoría</h2>
+                  <p className="mt-3 text-slate-200">
+                    {pendingCategoryChange.kind === 'insufficient'
+                      ? 'Necesitas al menos 3 participantes para jugar Impostor.'
+                      : 'Si cambias la categoría, se reiniciará la partida actual.'}
+                  </p>
                 <div className="mt-6 flex gap-3">
                   <button
                     className="flex-1 rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
@@ -635,7 +635,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   variant="cool"
                   type="button"
                 >
-                  Cambiar categoria
+                  Cambiar categoría
                 </LiquidButton>
                 <div
                   className="rounded-full border px-4 py-2 text-sm text-white/80"
@@ -644,7 +644,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     backgroundColor: `${selectedColor}12`,
                   }}
                 >
-                  {selectedCategory?.label ?? 'Sin categoria'}
+                  {selectedCategory?.label ?? 'Sin categoría'}
                 </div>
               </div>
 
@@ -689,7 +689,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   <span className="mt-2 block text-sm text-slate-200">
                     {showHint
                       ? 'Activa para mostrar una pista solo al impostor.'
-                      : 'Desactivada para jugar mas dificil.'}
+                      : 'Desactivada para jugar más difícil.'}
                   </span>
                 </button>
 
@@ -707,7 +707,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   {revealStep === 'covered'
                     ? 'Muestra el papel de este jugador.'
                     : currentTurnIndex + 1 < turnOrder.length
-                      ? 'Pulsa siguiente para pasar al proximo jugador.'
+                      ? 'Pulsa siguiente para pasar al próximo jugador.'
                       : 'Ya todos vieron su papel. Ahora puede empezar la ronda.'}
                 </p>
               </div>
@@ -734,7 +734,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     <div className="relative z-10 mt-4 flex w-full flex-col items-center">
                       <div className="rounded-[2rem] border border-white/10 bg-black/25 px-6 py-8 text-center">
                         <p className="text-sm uppercase tracking-[0.45em] text-white/55">
-                          Pasa el telefono
+                          Pasa el teléfono
                         </p>
                         <p className="mt-5 text-3xl font-black" style={{ color: selectedColor }}>
                           {currentPlayer.name}
@@ -820,9 +820,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
             <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 px-4 backdrop-blur-md">
               <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-center text-white shadow-2xl">
                 <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
-                <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+                <h2 className="mt-3 text-2xl font-black">Cambiar categoría</h2>
                 <p className="mt-3 text-slate-200">
-                  Si cambias la categoria, se reiniciara la partida actual.
+                  Si cambias la categoría, se reiniciará la partida actual.
                 </p>
                 <div className="mt-6 flex gap-3">
                   <button
@@ -887,7 +887,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   variant="cool"
                   type="button"
                 >
-                  Cambiar categoria
+                  Cambiar categoría
                 </LiquidButton>
                 <div
                   className="rounded-full border px-4 py-2 text-sm text-white/80"
@@ -896,7 +896,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     backgroundColor: `${selectedColor}12`,
                   }}
                 >
-                  {selectedCategory?.label ?? 'Sin categoria'}
+                  {selectedCategory?.label ?? 'Sin categoría'}
                 </div>
               </div>
 
@@ -915,8 +915,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                       {currentPlayer.name}
                     </p>
                     <p className="mt-1 text-slate-200">
-                      La discusion esta en marcha. Cuando termine el tiempo, elige votar o seguir
-                      con otra ronda.
+                      La discusión está en marcha. No hace falta esperar a que termine el tiempo
+                      para votar o seguir con otra ronda.
                     </p>
                   </div>
                 </div>
@@ -940,8 +940,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                 <p className="text-sm uppercase tracking-[0.35em] text-white/50">Estado</p>
                 <p className="mt-2 text-lg text-slate-200">
                   {roundSecondsLeft > 0
-                    ? 'Debatan y observen. Cuando llegue a cero podran votar o seguir con otra ronda.'
-                    : 'El tiempo termino. Ahora pueden votar o seguir con otra ronda.'}
+                    ? 'Debatan y observen. Pueden votar o seguir con otra ronda sin esperar al final.'
+                    : 'El tiempo terminó. Ahora pueden votar o seguir con otra ronda.'}
                 </p>
               </div>
             </section>
@@ -967,7 +967,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     </p>
                     <p className="mt-5 text-6xl font-black text-white">{roundSecondsLeft}</p>
                     <p className="mt-3 text-slate-200">
-                      Cuando el contador llegue a cero, decide si seguir una ronda mas o pasar a
+                      Cuando el contador llegue a cero, decide si seguir una ronda más o pasar a
                       votar.
                     </p>
 
@@ -981,7 +981,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                       <LiquidButton
                         className="w-full"
-                        disabled={!roundFinished}
                         onClick={(event) => {
                           onButtonPress(event);
                           handleContinueRound();
@@ -994,7 +993,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                       </LiquidButton>
                       <LiquidButton
                         className="w-full"
-                        disabled={!roundFinished}
                         onClick={(event) => {
                           onButtonPress(event);
                           handleGoToVote();
@@ -1010,11 +1008,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                       </LiquidButton>
                     </div>
 
-                    {!roundFinished && (
-                      <p className="mt-4 text-sm text-slate-300">
-                        Espera a que termine el tiempo para habilitar las opciones.
-                      </p>
-                    )}
+                    <p className="mt-4 text-sm text-slate-300">
+                      Puedes votar o seguir con otra ronda cuando quieras.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1027,9 +1023,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
             <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 px-4 backdrop-blur-md">
               <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-center text-white shadow-2xl">
                 <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
-                <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+                <h2 className="mt-3 text-2xl font-black">Cambiar categoría</h2>
                 <p className="mt-3 text-slate-200">
-                  Si cambias la categoria, se reiniciara la partida actual.
+                  Si cambias la categoría, se reiniciará la partida actual.
                 </p>
                 <div className="mt-6 flex gap-3">
                   <button
@@ -1081,7 +1077,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
             <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-inner shadow-black/25">
               <p className="text-sm uppercase tracking-[0.45em] text-white/60">MondeFan</p>
-              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Votacion</h1>
+              <h1 className="mt-2 text-4xl font-black sm:text-5xl">Votación</h1>
               <p className="mt-3 max-w-2xl text-slate-200">
                 Selecciona a la persona que crees que es el impostor y confirma tu voto.
               </p>
@@ -1092,7 +1088,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   #{roundIndex}
                 </p>
                 <p className="mt-2 text-slate-200">
-                  Si votan al impostor, ganan todos los demas. Si se equivocan, gana el impostor.
+                  Si votan al impostor, ganan todos los demás. Si se equivocan, gana el impostor.
                 </p>
               </div>
             </section>
@@ -1181,9 +1177,9 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
             <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 px-4 backdrop-blur-md">
               <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-center text-white shadow-2xl">
                 <p className="text-sm uppercase tracking-[0.45em] text-white/60">Aviso</p>
-                <h2 className="mt-3 text-2xl font-black">Cambiar categoria</h2>
+                <h2 className="mt-3 text-2xl font-black">Cambiar categoría</h2>
                 <p className="mt-3 text-slate-200">
-                  Si cambias la categoria, se reiniciara la partida actual.
+                  Si cambias la categoría, se reiniciará la partida actual.
                 </p>
                 <div className="mt-6 flex gap-3">
                   <button
