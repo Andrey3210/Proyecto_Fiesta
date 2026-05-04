@@ -1,4 +1,3 @@
-import { ArrowLeft } from 'lucide-react';
 import { FaMask } from 'react-icons/fa';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 
@@ -59,24 +58,10 @@ function GameHub({
   onSelectGame,
   onButtonPress,
 }: GameHubProps) {
+  void onBackToWelcome;
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-transparent text-white">
-      <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
-        <button
-          className="rounded-full border border-white/10 bg-slate-950/80 px-5 py-3 text-sm font-semibold shadow-2xl backdrop-blur-xl transition hover:bg-slate-900"
-          onClick={(event) => {
-            onButtonPress(event);
-            onBackToWelcome();
-          }}
-          type="button"
-        >
-          <span className="flex items-center gap-2">
-            <ArrowLeft size={18} />
-            Editar
-          </span>
-        </button>
-      </div>
-
       <RadialOrbitalTimeline
         activeId={null}
         subtitle={`Participantes listos: ${participants.length}. Toca un juego para empezar.`}

@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FaArrowLeft, FaForward, FaGlassCheers, FaQuestionCircle } from 'react-icons/fa';
+import { FaForward, FaGlassCheers, FaQuestionCircle } from 'react-icons/fa';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -64,6 +64,8 @@ const categoryVisuals: Record<
 };
 
 function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDareGameProps) {
+  void onBackToHub;
+
   const participantSignature = participants.map((participant) => participant.id).join('|');
   const [turnOrder, setTurnOrder] = useState<string[]>(() =>
     shuffleList(participants.map((participant) => participant.id)),
@@ -224,18 +226,6 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
         <div className="max-w-md rounded-3xl border border-white/10 bg-slate-950/80 p-8 shadow-2xl backdrop-blur-2xl">
           <p className="text-2xl font-black">No hay participantes disponibles.</p>
           <p className="mt-2 text-slate-200">Vuelve al hub y agrega al menos 2 jugadores.</p>
-          <LiquidButton
-            className="mt-6"
-            onClick={(event) => {
-              onButtonPress(event);
-              onBackToHub();
-            }}
-            size="lg"
-            variant="cool"
-            type="button"
-          >
-            Volver
-          </LiquidButton>
         </div>
       </div>
     );
@@ -244,22 +234,6 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
   if (!selectedCategory) {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
-        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
-          <LiquidButton
-            className="rounded-full !px-4 !py-4"
-            onClick={(event) => {
-              onButtonPress(event);
-              onBackToHub();
-            }}
-            size="lg"
-            variant="cool"
-            type="button"
-            aria-label="Volver"
-          >
-            <FaArrowLeft />
-          </LiquidButton>
-        </div>
-
         <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10">
@@ -322,22 +296,6 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
-        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
-          <LiquidButton
-            className="rounded-full !px-4 !py-4"
-            onClick={(event) => {
-              onButtonPress(event);
-              onBackToHub();
-            }}
-            size="lg"
-            variant="cool"
-            type="button"
-            aria-label="Volver"
-          >
-            <FaArrowLeft />
-          </LiquidButton>
-        </div>
-
       <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
         <div className="relative z-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">

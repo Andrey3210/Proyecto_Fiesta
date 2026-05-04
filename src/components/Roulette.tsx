@@ -1,6 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { Wheel, type WheelDataType } from 'react-custom-roulette';
-import { FaArrowLeft } from 'react-icons/fa';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -17,6 +16,8 @@ type RouletteProps = {
 type SpinProfile = 'agile' | 'normal' | 'smooth';
 
 function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
+  void onBackToHub;
+
   const [mustSpin, setMustSpin] = useState(false);
   const [prizeNumber, setPrizeNumber] = useState(0);
   const [selected, setSelected] = useState<Participant | null>(null);
@@ -49,18 +50,6 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
         <div className="max-w-md rounded-3xl border border-white/10 bg-slate-950/80 p-8 shadow-2xl backdrop-blur-2xl">
           <p className="text-2xl font-black">Faltan participantes</p>
           <p className="mt-2 text-slate-200">Agrega al menos 2 para usar la ruleta.</p>
-          <LiquidButton
-            className="mt-6"
-            onClick={(event) => {
-              onButtonPress(event);
-              onBackToHub();
-            }}
-            size="lg"
-            variant="cool"
-            type="button"
-          >
-            Volver
-          </LiquidButton>
         </div>
       </div>
     );
@@ -98,22 +87,6 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
-      <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
-          <LiquidButton
-            className="rounded-full !px-4 !py-4"
-            onClick={(event) => {
-              onButtonPress(event);
-              onBackToHub();
-            }}
-            size="lg"
-            variant="cool"
-            type="button"
-            aria-label="Volver"
-          >
-            <FaArrowLeft />
-          </LiquidButton>
-        </div>
-
       <div className="w-full max-w-[92rem] overflow-hidden rounded-[2.25rem] border border-white/10 bg-slate-950/80 p-4 shadow-[0_40px_120px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-8">
         <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-500/18 via-sky-500/8 to-black/75" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.22),transparent_30%)]" />

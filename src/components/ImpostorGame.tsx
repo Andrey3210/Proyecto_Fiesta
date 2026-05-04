@@ -1,13 +1,6 @@
 ﻿import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  FaArrowLeft,
-  FaClock,
-  FaEye,
-  FaEyeSlash,
-  FaRedoAlt,
-  FaUsers,
-} from 'react-icons/fa';
+import { FaClock, FaEye, FaEyeSlash, FaRedoAlt, FaUsers } from 'react-icons/fa';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
@@ -49,6 +42,8 @@ const shuffleList = <T,>(values: readonly T[]) => {
 const roundDuration = 45;
 
 function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGameProps) {
+  void onBackToHub;
+
   const participantSignature = participants.map((participant) => participant.id).join('|');
   const [phase, setPhase] = useState<Phase>('setup');
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<ImpostorCategoryKey | null>(null);
@@ -237,22 +232,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   if (phase === 'setup') {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
-        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
-          <LiquidButton
-            className="rounded-full !px-4 !py-4"
-            onClick={(event) => {
-              onButtonPress(event);
-              onBackToHub();
-            }}
-            size="lg"
-            variant="cool"
-            type="button"
-            aria-label="Volver"
-          >
-            <FaArrowLeft />
-          </LiquidButton>
-        </div>
-
         <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10">
@@ -406,22 +385,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
-        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
-          <LiquidButton
-            className="rounded-full !px-4 !py-4"
-            onClick={(event) => {
-              onButtonPress(event);
-              onBackToHub();
-            }}
-            size="lg"
-            variant="cool"
-            type="button"
-            aria-label="Volver"
-          >
-            <FaArrowLeft />
-          </LiquidButton>
-        </div>
-
         <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
@@ -595,22 +558,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   if (phase === 'reveal') {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
-        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
-          <LiquidButton
-            className="rounded-full !px-4 !py-4"
-            onClick={(event) => {
-              onButtonPress(event);
-              onBackToHub();
-            }}
-            size="lg"
-            variant="cool"
-            type="button"
-            aria-label="Volver"
-          >
-            <FaArrowLeft />
-          </LiquidButton>
-        </div>
-
         <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
@@ -815,22 +762,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   if (phase === 'round') {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
-        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
-          <LiquidButton
-            className="rounded-full !px-4 !py-4"
-            onClick={(event) => {
-              onButtonPress(event);
-              onBackToHub();
-            }}
-            size="lg"
-            variant="cool"
-            type="button"
-            aria-label="Volver"
-          >
-            <FaArrowLeft />
-          </LiquidButton>
-        </div>
-
         <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
@@ -1006,22 +937,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   if (phase === 'vote') {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
-        <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
-          <LiquidButton
-            className="rounded-full !px-4 !py-4"
-            onClick={(event) => {
-              onButtonPress(event);
-              onBackToHub();
-            }}
-            size="lg"
-            variant="cool"
-            type="button"
-            aria-label="Volver"
-          >
-            <FaArrowLeft />
-          </LiquidButton>
-        </div>
-
         <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
@@ -1144,18 +1059,6 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
       <div className="max-w-md rounded-3xl border border-white/10 bg-slate-950/80 p-8 shadow-2xl backdrop-blur-2xl">
         <p className="text-2xl font-black">No hay partida activa.</p>
         <p className="mt-2 text-slate-200">Vuelve al inicio y arranca una ronda nueva.</p>
-        <LiquidButton
-          className="mt-6"
-          onClick={(event) => {
-            onButtonPress(event);
-            onBackToHub();
-          }}
-          size="lg"
-          variant="cool"
-          type="button"
-        >
-          Volver
-        </LiquidButton>
       </div>
     </div>
   );

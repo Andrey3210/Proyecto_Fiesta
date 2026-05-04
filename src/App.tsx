@@ -6,6 +6,7 @@ import ImpostorGame from './components/ImpostorGame';
 import Roulette from './components/Roulette';
 import WelcomeScreen from './components/WelcomeScreen';
 import TruthOrDareGame from './components/TruthOrDareGame';
+import FloatingBackButton from '@/components/ui/floating-back-button';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import DigitalGlitch from '@/components/ui/digital-glitch';
 import {
@@ -297,6 +298,19 @@ function App() {
     setShowInstallHelp(true);
   };
 
+  const handleBackNavigation = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    triggerButtonPulse(event);
+
+    if (stage === 'hub') {
+      setStage('welcome');
+      return;
+    }
+
+    if (stage === 'game') {
+      setPendingExit('hub');
+    }
+  };
+
   if (stage === 'welcome') {
     return (
       <div className="relative min-h-screen overflow-hidden">
@@ -318,6 +332,7 @@ function App() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <DigitalGlitch {...backgroundProps} pulse={buttonPulse} />
+      <FloatingBackButton onClick={handleBackNavigation} />
       {!isAppInstalled && (
         <div className="fixed right-4 top-4 z-50">
           <LiquidButton
