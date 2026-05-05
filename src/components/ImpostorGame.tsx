@@ -41,6 +41,11 @@ const shuffleList = <T,>(values: readonly T[]) => {
 
 const roundDuration = 45;
 
+const impostorBackdropStyle = {
+  background:
+    'radial-gradient(circle at top, rgba(16, 185, 129, 0.20), transparent 34%), radial-gradient(circle at bottom right, rgba(34, 211, 238, 0.14), transparent 30%), radial-gradient(circle at left, rgba(59, 130, 246, 0.08), transparent 26%)',
+};
+
 function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGameProps) {
   void onBackToHub;
 
@@ -231,7 +236,10 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
   if (phase === 'setup') {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+      <div
+        className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24"
+        style={impostorBackdropStyle}
+      >
         <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10">
@@ -384,7 +392,10 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
       voteResult === 'group-wins' ? 'Ganaron los demás' : 'Ganó el impostor';
 
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+      <div
+        className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24"
+        style={impostorBackdropStyle}
+      >
         <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
@@ -557,7 +568,10 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
   if (phase === 'reveal') {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+      <div
+        className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24"
+        style={impostorBackdropStyle}
+      >
         <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
@@ -761,7 +775,10 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
 
   if (phase === 'round') {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+      <div
+        className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24"
+        style={impostorBackdropStyle}
+      >
         <div className="w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
@@ -1055,7 +1072,10 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 text-center text-white">
+    <div
+      className="flex min-h-screen items-center justify-center px-4 text-center text-white"
+      style={impostorBackdropStyle}
+    >
       <div className="max-w-md rounded-3xl border border-white/10 bg-slate-950/80 p-8 shadow-2xl backdrop-blur-2xl">
         <p className="text-2xl font-black">No hay partida activa.</p>
         <p className="mt-2 text-slate-200">Vuelve al inicio y arranca una ronda nueva.</p>

@@ -122,7 +122,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
               ))}
             </div>
 
-            <div className="relative mx-auto mt-10 flex w-full max-w-[min(92vw,34rem)] justify-center -translate-x-3 sm:-translate-x-4">
+            <div className="relative mx-auto mt-10 flex w-full max-w-[min(92vw,34rem)] justify-center">
               <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2">
                 <div className="h-0 w-0 border-l-[22px] border-r-[22px] border-b-[40px] border-l-transparent border-r-transparent border-b-white drop-shadow-[0_8px_18px_rgba(255,255,255,0.55)]" />
               </div>

@@ -156,21 +156,21 @@ function App() {
   const backgroundProps =
     stage === 'welcome'
       ? {
-          baseColor: '#4fc9ff',
-          speed: 0.78,
-          glitchIntensity: 0.34,
-          rgbShift: 0.013,
-          scanlineDensity: 1360,
-          scanlineOpacity: 0.14,
+          baseColor: '#38d8ff',
+          speed: 0.76,
+          glitchIntensity: 0.32,
+          rgbShift: 0.012,
+          scanlineDensity: 1440,
+          scanlineOpacity: 0.12,
         }
       : stage === 'hub'
         ? {
-            baseColor: '#7d8bff',
-            speed: 0.92,
-            glitchIntensity: 0.48,
-            rgbShift: 0.016,
-            scanlineDensity: 1160,
-            scanlineOpacity: 0.16,
+            baseColor: '#8b5cf6',
+            speed: 0.9,
+            glitchIntensity: 0.46,
+            rgbShift: 0.015,
+            scanlineDensity: 1180,
+            scanlineOpacity: 0.15,
           }
       : gameMode === 'roulette'
         ? {
@@ -183,21 +183,21 @@ function App() {
           }
         : gameMode === 'impostor'
         ? {
-            baseColor: '#46f2b1',
-            speed: 1.08,
-            glitchIntensity: 0.62,
-            rgbShift: 0.02,
-            scanlineDensity: 1080,
-            scanlineOpacity: 0.18,
+            baseColor: '#34d399',
+            speed: 1.04,
+            glitchIntensity: 0.58,
+            rgbShift: 0.019,
+            scanlineDensity: 1100,
+            scanlineOpacity: 0.17,
           }
         : {
-            baseColor: '#8bffcf',
-            speed: 1.05,
-            glitchIntensity: 0.58,
-            rgbShift: 0.018,
-            scanlineDensity: 1120,
-            scanlineOpacity: 0.18,
-          };
+            baseColor: '#f59e0b',
+            speed: 1.02,
+            glitchIntensity: 0.56,
+            rgbShift: 0.017,
+            scanlineDensity: 1140,
+            scanlineOpacity: 0.16,
+        };
 
   useEffect(() => {
     window.localStorage.setItem(storageKey, JSON.stringify(participants));

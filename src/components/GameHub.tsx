@@ -1,4 +1,4 @@
-import { FaMask } from 'react-icons/fa';
+import { FaClock, FaMask } from 'react-icons/fa';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 
 import RadialOrbitalTimeline, {
@@ -50,7 +50,23 @@ const timelineData: TimelineItem[] = [
     status: 'completed',
     energy: 92,
   },
+  {
+    id: 4,
+    title: 'Próximamente',
+    date: 'Muy pronto',
+    content: 'Tienes un comodín de 2 nuevos juegos porque no me alcanzó tiempo :(',
+    category: 'Próximamente',
+    icon: FaClock,
+    relatedIds: [1, 2, 3],
+    status: 'pending',
+    energy: 65,
+  },
 ];
+
+const hubBackdropStyle = {
+  background:
+    'radial-gradient(circle at top, rgba(99, 102, 241, 0.24), transparent 34%), radial-gradient(circle at bottom left, rgba(34, 211, 238, 0.18), transparent 30%), radial-gradient(circle at center right, rgba(168, 85, 247, 0.14), transparent 24%)',
+};
 
 function GameHub({
   participants,
@@ -62,11 +78,14 @@ function GameHub({
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-transparent text-white">
+      <div className="pointer-events-none absolute inset-0" style={hubBackdropStyle} />
+      <div className="pointer-events-none absolute left-0 top-24 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-6 right-10 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
       <RadialOrbitalTimeline
         activeId={null}
         subtitle={`Participantes listos: ${participants.length}. Toca un juego para empezar.`}
         timelineData={timelineData}
-        title="Juegos de Fiesta"
+        title="Juegos"
         onItemSelect={(item) => {
           if (item.id === 1) {
             onSelectGame('roulette');

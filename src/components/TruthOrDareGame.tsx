@@ -63,6 +63,11 @@ const categoryVisuals: Record<
   },
 };
 
+const truthBackdropStyle = {
+  background:
+    'radial-gradient(circle at top, rgba(251, 191, 36, 0.18), transparent 34%), radial-gradient(circle at bottom right, rgba(244, 114, 182, 0.14), transparent 30%), radial-gradient(circle at left, rgba(56, 189, 248, 0.08), transparent 26%)',
+};
+
 function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDareGameProps) {
   void onBackToHub;
 
@@ -233,7 +238,10 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
 
   if (!selectedCategory) {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+      <div
+        className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24"
+        style={truthBackdropStyle}
+      >
         <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
           <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
           <div className="relative z-10">
@@ -295,7 +303,10 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+    <div
+      className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24"
+      style={truthBackdropStyle}
+    >
       <div className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/80 p-4 shadow-2xl backdrop-blur-2xl sm:p-8">
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/80" />
         <div className="relative z-10 grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">

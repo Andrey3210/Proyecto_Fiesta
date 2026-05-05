@@ -17,6 +17,11 @@ type WelcomeScreenProps = {
   onButtonPress: (event: ReactMouseEvent<HTMLElement>) => void;
 };
 
+const welcomeBackdropStyle = {
+  background:
+    'radial-gradient(circle at top left, rgba(34, 211, 238, 0.24), transparent 34%), radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.20), transparent 30%), radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.14), transparent 26%)',
+};
+
 function WelcomeScreen({
   participants,
   onAddParticipant,
@@ -70,15 +75,18 @@ function WelcomeScreen({
   }, [editingId]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-transparent px-4 py-10 text-white">
+    <div className="relative flex min-h-screen flex-col items-center overflow-hidden bg-transparent px-4 py-10 text-white">
+      <div className="pointer-events-none absolute inset-0" style={welcomeBackdropStyle} />
+      <div className="pointer-events-none absolute -left-16 top-20 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-4 right-0 h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
       <div className="w-full max-w-5xl app-fade-up">
         <div className="mb-8 text-center">
-          <p className="mb-2 text-sm uppercase tracking-[0.5em] text-cyan-200/80">
+          <p className="mb-2 text-sm uppercase tracking-[0.5em] text-cyan-100/80">
             MondeFan
           </p>
-          <h1 className="text-5xl font-black tracking-tight">Bienvenida</h1>
+          <h1 className="text-5xl font-black tracking-tight">Feliz Cumpleaños Mala! 🥳</h1>
           <p className="mt-3 text-lg text-slate-200">
-            Agrega participantes, edita sus nombres y juega cuando haya 2 o mas.
+            Esta app es un regalo para Tuti.
           </p>
         </div>
 
@@ -110,6 +118,9 @@ function WelcomeScreen({
                   {editingId ? 'Guardar cambio' : 'Agregar'}
                 </LiquidButton>
               </div>
+              <p className="text-sm text-slate-300">
+                Total de participantes: <span className="font-semibold text-white">{participants.length}</span>
+              </p>
             </div>
 
             <ul className="space-y-3">
@@ -161,50 +172,10 @@ function WelcomeScreen({
                 </li>
               ))}
             </ul>
-          </section>
 
-          <aside className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/55 p-6 shadow-2xl backdrop-blur-2xl app-fade-up-delay">
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-black/65" />
-            <div className="relative z-10 flex flex-col justify-between">
-              <h2 className="text-2xl font-bold">Listos para jugar</h2>
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-300/70">
-                    Total
-                  </p>
-                  <p className="mt-1 text-2xl font-black">{participants.length}</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-300/70">
-                    Lista
-                  </p>
-                  <p className="mt-1 text-2xl font-black">
-                    {participants.length >= 2 ? 'Lista' : 'Falta'}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                {participants.slice(0, 4).map((participant) => (
-                  <div
-                    key={participant.id}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-3 text-center app-float"
-                  >
-                    <ParticipantAvatarBadge
-                      avatar={participant.avatar}
-                      backgroundColor={participant.color}
-                      className="mx-auto mb-2"
-                      seed={participant.avatarSeed}
-                      alt={participant.name}
-                    />
-                    <p className="text-sm font-semibold">{participant.name}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative z-10">
+            <div className="mt-6">
               <LiquidButton
-                className="mt-8 w-full"
+                className="w-full"
                 disabled={participants.length < 2}
                 onClick={(event) => {
                   onButtonPress(event);
@@ -218,10 +189,11 @@ function WelcomeScreen({
               </LiquidButton>
 
               <p className="mt-3 text-sm text-slate-300">
-                Necesitas 2 o mas participantes para activar la ruleta.
+                Necesitas 2 o mas participantes para empezar a jugar.
               </p>
             </div>
-          </aside>
+          </section>
+
         </div>
       </div>
     </div>
