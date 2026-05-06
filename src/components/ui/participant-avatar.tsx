@@ -18,7 +18,7 @@ export function ParticipantAvatarImage({ avatar, seed, alt, className, style }: 
   return (
     <img
       alt={alt}
-      className={className}
+      className={`block rounded-full object-cover ${className ?? ''}`}
       src={participantAvatarToSrc(avatar, seed)}
       style={style}
     />
@@ -52,7 +52,7 @@ export function ParticipantAvatarBadge({
         avatar={avatar}
         seed={seed}
         alt={alt}
-        className="h-[92%] w-[92%] object-contain"
+        className="h-[92%] w-[92%]"
       />
     </span>
   );

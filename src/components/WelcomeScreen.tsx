@@ -49,6 +49,11 @@ function WelcomeScreen({
 
     setName('');
     setEditingId(null);
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   };
 
   const handleEdit = (participant: Participant) => {

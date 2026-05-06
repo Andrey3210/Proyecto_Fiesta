@@ -99,6 +99,93 @@
     }
   }
 
+  @keyframes app-choice-responded {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    60% {
+      opacity: 0.95;
+      transform: translateY(-14px) scale(0.985);
+      filter: blur(0);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(-36px) scale(0.965);
+      filter: blur(10px);
+    }
+  }
+
+  @keyframes app-choice-shot {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    60% {
+      opacity: 0.95;
+      transform: translateY(14px) scale(0.985);
+      filter: blur(0);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(36px) scale(0.965);
+      filter: blur(10px);
+    }
+  }
+
+  @keyframes app-feedback-responded {
+    0% {
+      opacity: 0;
+      transform: scale(0.25);
+    }
+
+    20% {
+      opacity: 1;
+      transform: scale(0.6);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(2.2);
+    }
+  }
+
+  @keyframes app-feedback-shot {
+    0% {
+      opacity: 0;
+      transform: scale(0.25);
+    }
+
+    20% {
+      opacity: 1;
+      transform: scale(0.62);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(2.4);
+    }
+  }
+
+  @keyframes app-shot-burst {
+    0%,
+    100% {
+      transform: scale(1) rotate(-2deg);
+      filter: saturate(1);
+    }
+
+    50% {
+      transform: scale(1.08) rotate(2deg);
+      filter: saturate(1.2);
+    }
+  }
+
   .app-fade-up {
     animation: app-fade-up 700ms ease both;
   }
@@ -121,5 +208,25 @@
 
   .app-turn-rise {
     animation: app-turn-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .app-choice-responded {
+    animation: app-choice-responded 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .app-choice-shot {
+    animation: app-choice-shot 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .app-feedback-responded {
+    animation: app-feedback-responded 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .app-feedback-shot {
+    animation: app-feedback-shot 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .app-shot-burst {
+    animation: app-shot-burst 240ms ease-in-out 3;
   }
 }

@@ -617,23 +617,13 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     <p className="text-3xl font-black" style={{ color: currentPlayer.color }}>
                       {currentPlayer.name}
                     </p>
-                    <p className="mt-1 text-slate-200">
-                      Mira tu papel y pulsa siguiente para pasar al siguiente jugador.
-                    </p>
+                    <p className="mt-1 text-slate-200">Solo esta persona lo ve.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-4">
-                <p className="mt-2 text-sm text-slate-200">
-                  {currentTurnIndex + 1} de {turnOrder.length}
-                </p>
-              </div>
-
               <div className="mt-6 rounded-3xl border border-white/10 bg-slate-950/60 p-4 sm:p-5">
-                <p className="mt-2 text-lg text-slate-200">
-                  {currentTurnIndex + 1 < turnOrder.length ? 'Pasa el teléfono.' : 'Listo para empezar.'}
-                </p>
+                <p className="mt-2 text-lg text-slate-200">Mira tu papel y pulsa siguiente.</p>
               </div>
             </section>
 

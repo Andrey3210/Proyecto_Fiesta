@@ -65,7 +65,7 @@ export default function RadialOrbitalTimeline({
 
   // Loop
   useEffect(() => {
-    const INTRO_MS = 2200;   // duraciÃ³n del burst (mÃ¡s lento)
+    const INTRO_MS = 1150;
     const start    = performance.now();
     let   last     = start;
 
@@ -84,8 +84,8 @@ export default function RadialOrbitalTimeline({
       if (!introDoneRef.current) {
         const elapsed = now - start;
         const t = Math.min(1, elapsed / INTRO_MS);
-        // easeOutCubic: sale rÃ¡pido al principio, frena suavemente
-        introRef.current = 1 - Math.pow(1 - t, 3);
+        // Ease agresivo: la órbita se abre más rápido al principio y se asienta antes.
+        introRef.current = 1 - Math.pow(1 - t, 4);
         if (t >= 1) {
           introRef.current     = 1;
           introDoneRef.current = true;
@@ -94,7 +94,9 @@ export default function RadialOrbitalTimeline({
 
       // 2. RotaciÃ³n constante
       if (autoRotateRef.current) {
-        rotationRef.current = (rotationRef.current + delta * rotSpeedRef.current) % 360;
+        const introBoost = introDoneRef.current ? 1 : 1 + (1 - introRef.current) * 2.4;
+        rotationRef.current =
+          (rotationRef.current + delta * rotSpeedRef.current * introBoost) % 360;
       }
 
       // 3. Posicionar nodos
@@ -117,9 +119,10 @@ export default function RadialOrbitalTimeline({
         // zIndex solo para que los nodos "delanteros" tapen a los traseros
         const zIndex = Math.round(100 + 50 * Math.sin(angleRad));
 
-        el.style.transform = `translate(${x}px, ${y}px)`;
+        el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
         el.style.zIndex    = String(zIndex);
         el.style.opacity   = String(Math.min(1, intro * 1.4)); // aparecen suavemente
+        el.style.willChange = 'transform';
       }
 
       rafRef.current = requestAnimationFrame(frame);
@@ -217,7 +220,7 @@ export default function RadialOrbitalTimeline({
                   key={item.id}
                   ref={el => { nodeRefs.current[index] = el; }}
                   className={cn(
-                    'absolute',
+                    'absolute transform-gpu',
                     isPending ? 'cursor-default' : 'cursor-pointer',
                   )}
                   style={{

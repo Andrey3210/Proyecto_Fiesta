@@ -332,7 +332,10 @@ function App() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <DigitalGlitch {...backgroundProps} pulse={buttonPulse} />
-      <FloatingBackButton onClick={handleBackNavigation} />
+      <FloatingBackButton
+        label={stage === 'hub' ? 'Participantes' : undefined}
+        onClick={handleBackNavigation}
+      />
       {!isAppInstalled && (
         <div className="fixed right-4 top-4 z-50">
           <LiquidButton
@@ -349,7 +352,7 @@ function App() {
           </LiquidButton>
         </div>
       )}
-      <div key={`games-${stage}-${gameMode}`} className="app-stage-in">
+      <div key={`games-${stage}-${gameMode}`} className="app-stage-in pt-20 sm:pt-24">
         {stage === 'hub' ? (
           <GameHub
             participants={participants}

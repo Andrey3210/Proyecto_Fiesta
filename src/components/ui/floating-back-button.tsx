@@ -10,23 +10,27 @@ type FloatingBackButtonProps = {
 };
 
 function FloatingBackButton({
-  label = 'Volver',
+  label,
   onClick,
-  ariaLabel = label,
+  ariaLabel = label ?? 'Volver',
 }: FloatingBackButtonProps) {
+  const showLabel = typeof label === 'string' && label.length > 0;
+
   return (
     <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
       <LiquidButton
         aria-label={ariaLabel}
-        className="rounded-full !px-4 !py-3 shadow-2xl"
+        className={`rounded-full shadow-2xl ${
+          showLabel ? '!px-4 !py-3' : '!h-12 !w-12 !px-0 !py-0'
+        }`}
         onClick={onClick}
         size="lg"
         variant="cool"
         type="button"
       >
-        <span className="flex items-center gap-2">
+        <span className={`flex items-center justify-center ${showLabel ? 'gap-2' : ''}`}>
           <FaArrowLeft />
-          <span>{label}</span>
+          {showLabel ? <span>{label}</span> : null}
         </span>
       </LiquidButton>
     </div>
