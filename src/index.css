@@ -186,6 +186,35 @@
     }
   }
 
+  @keyframes app-glitch-burst {
+    0% {
+      transform: translate3d(0, 0, 0) skewX(0deg);
+      filter: contrast(1) saturate(1);
+    }
+
+    15% {
+      transform: translate3d(-4px, 0, 0) skewX(-1.2deg);
+      filter: contrast(1.15) saturate(1.2);
+    }
+
+    30% {
+      transform: translate3d(4px, -1px, 0) skewX(1deg);
+    }
+
+    45% {
+      transform: translate3d(-3px, 1px, 0) skewX(-0.8deg);
+    }
+
+    60% {
+      transform: translate3d(3px, 0, 0) skewX(0.6deg);
+    }
+
+    100% {
+      transform: translate3d(0, 0, 0) skewX(0deg);
+      filter: contrast(1) saturate(1);
+    }
+  }
+
   .app-fade-up {
     animation: app-fade-up 700ms ease both;
   }
@@ -228,5 +257,9 @@
 
   .app-shot-burst {
     animation: app-shot-burst 240ms ease-in-out 3;
+  }
+
+  .app-glitch-burst {
+    animation: app-glitch-burst 420ms steps(2, end) both;
   }
 }

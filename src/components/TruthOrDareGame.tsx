@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import { FaFire } from 'react-icons/fa';
 
@@ -19,41 +19,131 @@ type TruthOrDareGameProps = {
 };
 
 type TurnOutcome =
-  | {
-      kind: 'responded';
-      id: number;
-      emoji: string;
-    }
-  | {
-      kind: 'shot';
-      id: number;
-    };
+  | { kind: 'responded'; id: number; emoji: string }
+  | { kind: 'shot'; id: number };
 
 type TurnTransition = 'responded' | 'shot' | null;
 
 const respondedEmojis = [
-  '\u{1F628}',
-  '\u{1FAE3}',
-  '\u{1F631}',
-  '\u{1F635}',
-  '\u{1F62C}',
-  '\u{1F62F}',
-  '\u{1F92F}',
-  '\u{1F976}',
+  '\u{1F628}','\u{1FAE3}','\u{1F631}','\u{1F635}',
+  '\u{1F62C}','\u{1F62F}','\u{1F92F}','\u{1F976}',
 ];
 
 const shuffleList = <T,>(values: readonly T[]) => {
   const order = [...values];
-
-  for (let index = order.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1));
-    [order[index], order[randomIndex]] = [order[randomIndex], order[index]];
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
   }
-
   return order;
 };
 
-const pickRandom = <T,>(values: readonly T[]) => values[Math.floor(Math.random() * values.length)] ?? values[0];
+const pickRandom = <T,>(values: readonly T[]) =>
+  values[Math.floor(Math.random() * values.length)] ?? values[0];
+
+// Colores accent por categoría para las tarjetas
+function getCategoryAccent(index: number) {
+  const palette = [
+    { from: 'rgba(236,72,153,0.18)', to: 'rgba(239,68,68,0.08)',   glow: 'rgba(236,72,153,0.40)',  border: 'rgba(236,72,153,0.30)' },
+    { from: 'rgba(59,130,246,0.18)', to: 'rgba(99,102,241,0.08)',  glow: 'rgba(59,130,246,0.38)',  border: 'rgba(59,130,246,0.28)' },
+    { from: 'rgba(34,197,94,0.16)',  to: 'rgba(16,185,129,0.08)',  glow: 'rgba(34,197,94,0.36)',   border: 'rgba(34,197,94,0.26)'  },
+    { from: 'rgba(251,191,36,0.18)', to: 'rgba(249,115,22,0.08)',  glow: 'rgba(251,191,36,0.38)',  border: 'rgba(251,191,36,0.28)' },
+    { from: 'rgba(168,85,247,0.18)', to: 'rgba(236,72,153,0.08)',  glow: 'rgba(168,85,247,0.38)',  border: 'rgba(168,85,247,0.28)' },
+    { from: 'rgba(20,184,166,0.18)', to: 'rgba(59,130,246,0.08)',  glow: 'rgba(20,184,166,0.36)',  border: 'rgba(20,184,166,0.26)' },
+  ];
+  return palette[index % palette.length];
+}
+
+function CategoryCard({
+  category,
+  index,
+  onSelect,
+}: {
+  category: (typeof truthCategories)[number];
+  index: number;
+  onSelect: () => void;
+}) {
+  const accent = getCategoryAccent(index);
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <button
+      type="button"
+      className="group relative w-full overflow-hidden rounded-[1.6rem] text-left transition-all duration-300"
+      style={{
+        border: `1px solid ${hovered ? accent.border : 'rgba(255,255,255,0.08)'}`,
+        background: hovered
+          ? `linear-gradient(135deg, ${accent.from}, ${accent.to}), rgba(15,23,42,0.7)`
+          : 'rgba(255,255,255,0.04)',
+        boxShadow: hovered
+          ? `0 0 0 1px ${accent.border}, 0 20px 60px rgba(0,0,0,0.3), 0 0 80px -20px ${accent.glow}`
+          : '0 4px 24px rgba(0,0,0,0.18)',
+        transform: hovered ? 'translateY(-3px) scale(1.01)' : 'translateY(0) scale(1)',
+      }}
+      onClick={onSelect}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Brillo superior */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px transition-opacity duration-300"
+        style={{
+          background: `linear-gradient(90deg, transparent, ${accent.glow}, transparent)`,
+          opacity: hovered ? 1 : 0,
+        }}
+      />
+
+      <div className="flex items-center gap-4 px-5 py-5">
+        {/* Emoji con halo */}
+        <div
+          className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-3xl transition-all duration-300"
+          style={{
+            background: hovered
+              ? `radial-gradient(circle, ${accent.from} 0%, rgba(0,0,0,0.3) 100%)`
+              : 'rgba(255,255,255,0.06)',
+            boxShadow: hovered ? `0 0 30px ${accent.glow}` : 'none',
+            transform: hovered ? 'scale(1.12)' : 'scale(1)',
+          }}
+        >
+          {category.emoji}
+        </div>
+
+        {/* Texto */}
+        <div className="min-w-0 flex-1">
+          <p
+            className="text-base font-black leading-tight tracking-tight transition-colors duration-200"
+            style={{ color: hovered ? '#fff' : 'rgba(255,255,255,0.9)' }}
+          >
+            {category.label}
+          </p>
+          <p className="mt-1 text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.52)' }}>
+            {category.description}
+          </p>
+        </div>
+
+        {/* Flecha */}
+        <div
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300"
+          style={{
+            background: hovered ? accent.glow : 'rgba(255,255,255,0.06)',
+            transform: hovered ? 'translateX(2px)' : 'translateX(0)',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path
+              d="M3 7h8M7.5 3.5L11 7l-3.5 3.5"
+              stroke="white"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeOpacity={hovered ? 1 : 0.5}
+            />
+          </svg>
+        </div>
+      </div>
+    </button>
+  );
+}
 
 function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDareGameProps) {
   void onBackToHub;
@@ -61,89 +151,63 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<TruthCategoryKey | null>(null);
   const [turnOrder, setTurnOrder] = useState<string[]>([]);
   const [currentTurnIndex, setCurrentTurnIndex] = useState(0);
+  const [roundNumber, setRoundNumber] = useState(1);
   const [truthDeck, setTruthDeck] = useState<string[]>([]);
   const [truthDeckIndex, setTruthDeckIndex] = useState(0);
   const [currentTruth, setCurrentTruth] = useState<string>('');
   const [turnTransition, setTurnTransition] = useState<TurnTransition>(null);
   const [turnOutcome, setTurnOutcome] = useState<TurnOutcome | null>(null);
+  const [selectionGlitch, setSelectionGlitch] = useState(false);
   const turnTimerRef = useRef<number | null>(null);
 
-  const participantSignature = useMemo(
-    () => participants.map((participant) => participant.id).join('|'),
-    [participants],
-  );
-
   const selectedCategory = selectedCategoryKey ? truthCategoryMap[selectedCategoryKey] : null;
-  const currentPlayer = turnOrder.length > 0
-    ? participants.find((participant) => participant.id === turnOrder[currentTurnIndex])
-    : null;
-
-  useEffect(() => {
-    const body = document.body;
-    const html = document.documentElement;
-    const previousBodyOverflow = body.style.overflow;
-    const previousHtmlOverflow = html.style.overflow;
-    const previousBodyOverscroll = body.style.overscrollBehavior;
-    const previousHtmlOverscroll = html.style.overscrollBehavior;
-
-    body.style.overflow = 'hidden';
-    html.style.overflow = 'hidden';
-    body.style.overscrollBehavior = 'none';
-    html.style.overscrollBehavior = 'none';
-
-    return () => {
-      body.style.overflow = previousBodyOverflow;
-      html.style.overflow = previousHtmlOverflow;
-      body.style.overscrollBehavior = previousBodyOverscroll;
-      html.style.overscrollBehavior = previousHtmlOverscroll;
-    };
-  }, []);
+  const currentPlayer =
+    turnOrder.length > 0
+      ? participants.find((p) => p.id === turnOrder[currentTurnIndex])
+      : null;
 
   useEffect(
     () => () => {
-      if (turnTimerRef.current !== null) {
-        window.clearTimeout(turnTimerRef.current);
-      }
+      if (turnTimerRef.current !== null) window.clearTimeout(turnTimerRef.current);
     },
     [],
   );
 
   useEffect(() => {
-    if (participants.length < 2 || !selectedCategoryKey) {
-      return;
+    if (!selectionGlitch) {
+      return undefined;
     }
 
-    if (turnOrder.length === 0) {
-      const nextOrder = shuffleList(participants.map((participant) => participant.id));
-      const nextTruthDeck = shuffleList(truthCategoryMap[selectedCategoryKey].questions);
+    const timeout = window.setTimeout(() => {
+      setSelectionGlitch(false);
+    }, 420);
 
-      setTurnOrder(nextOrder);
-      setCurrentTurnIndex(0);
-      setTruthDeck(nextTruthDeck);
-      setTruthDeckIndex(0);
-      setCurrentTruth(nextTruthDeck[0] ?? '');
-    }
-  }, [participants.length, selectedCategoryKey, turnOrder.length, participantSignature]);
+    return () => window.clearTimeout(timeout);
+  }, [selectionGlitch]);
+
+  const triggerSelectionGlitch = () => {
+    setSelectionGlitch(false);
+    window.requestAnimationFrame(() => {
+      setSelectionGlitch(true);
+    });
+  };
 
   const startRound = (categoryKey: TruthCategoryKey) => {
-    if (participants.length < 2) {
-      return;
-    }
-
+    if (participants.length < 2) return;
     if (turnTimerRef.current !== null) {
       window.clearTimeout(turnTimerRef.current);
       turnTimerRef.current = null;
     }
-
-    const nextOrder = shuffleList(participants.map((participant) => participant.id));
-    const nextTruthDeck = shuffleList(truthCategoryMap[categoryKey].questions);
-
+    triggerSelectionGlitch();
+    const nextOrder = shuffleList(participants.map((p) => p.id));
+    const nextDeck  = shuffleList(truthCategoryMap[categoryKey].questions);
     setSelectedCategoryKey(categoryKey);
     setTurnOrder(nextOrder);
     setCurrentTurnIndex(0);
-    setTruthDeck(nextTruthDeck);
+    setRoundNumber(1);
+    setTruthDeck(nextDeck);
     setTruthDeckIndex(0);
-    setCurrentTruth(nextTruthDeck[0] ?? '');
+    setCurrentTruth(nextDeck[0] ?? '');
     setTurnTransition(null);
     setTurnOutcome(null);
   };
@@ -153,69 +217,44 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
       window.clearTimeout(turnTimerRef.current);
       turnTimerRef.current = null;
     }
-
     setTurnTransition(null);
     setTurnOutcome(null);
-
-    setCurrentTurnIndex((currentIndex) => {
-      if (turnOrder.length === 0) {
-        return 0;
-      }
-
-      const nextIndex = (currentIndex + 1) % turnOrder.length;
-      return nextIndex;
+    setCurrentTurnIndex((cur) => {
+      if (turnOrder.length === 0) return 0;
+      const next = cur + 1;
+      if (next < turnOrder.length) return next;
+      setRoundNumber((r) => r + 1);
+      setTurnOrder(shuffleList(participants.map((p) => p.id)));
+      return 0;
     });
-
-    setTruthDeckIndex((currentIndex) => {
-      if (truthDeck.length === 0) {
-        return 0;
+    setTruthDeckIndex((cur) => {
+      if (truthDeck.length === 0) return 0;
+      const next = cur + 1;
+      if (next < truthDeck.length) {
+        setCurrentTruth(truthDeck[next]);
+        return next;
       }
-
-      const nextIndex = currentIndex + 1;
-
-      if (nextIndex < truthDeck.length) {
-        setCurrentTruth(truthDeck[nextIndex]);
-        return nextIndex;
-      }
-
       const nextDeck = shuffleList(selectedCategory ? selectedCategory.questions : truthCategories[0].questions);
-      const nextTruth = nextDeck[0] ?? '';
       setTruthDeck(nextDeck);
-      setCurrentTruth(nextTruth);
+      setCurrentTruth(nextDeck[0] ?? '');
       return 0;
     });
   };
 
   const finishTurn = (kind: 'responded' | 'shot') => {
-    if (!selectedCategory || currentPlayer === null || turnTransition !== null) {
-      return;
-    }
-
-    if (turnTimerRef.current !== null) {
-      window.clearTimeout(turnTimerRef.current);
-    }
-
-    const choiceDuration = 760;
-
+    if (!selectedCategory || currentPlayer === null || turnTransition !== null) return;
+    if (turnTimerRef.current !== null) window.clearTimeout(turnTimerRef.current);
+    triggerSelectionGlitch();
     setTurnTransition(kind);
     setTurnOutcome(
       kind === 'responded'
-        ? {
-            kind,
-            id: Date.now(),
-            emoji: pickRandom(respondedEmojis),
-          }
-        : {
-            kind,
-            id: Date.now(),
-          },
+        ? { kind, id: Date.now(), emoji: pickRandom(respondedEmojis) }
+        : { kind, id: Date.now() },
     );
-
-    turnTimerRef.current = window.setTimeout(() => {
-      advanceTurn();
-    }, choiceDuration);
+    turnTimerRef.current = window.setTimeout(() => advanceTurn(), 760);
   };
 
+  // ── Sin participantes ────────────────────────────────────
   if (participants.length < 2) {
     return (
       <div className="flex min-h-[100svh] items-center justify-center px-4 text-center text-white app-fade-up">
@@ -227,65 +266,54 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
     );
   }
 
+  // ── Selección de categoría ───────────────────────────────
   if (!selectedCategoryKey) {
     return (
-      <div className="relative flex min-h-[100svh] w-full items-start justify-center overflow-hidden bg-transparent px-3 pb-4 pt-[5.75rem] text-white app-fade-up sm:px-4 sm:pt-24">
-        <div className="w-full max-w-5xl overflow-hidden rounded-[2.25rem] border border-white/10 bg-slate-950/80 p-4 shadow-[0_30px_100px_rgba(0,0,0,0.42)] backdrop-blur-2xl sm:p-6">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_38%),linear-gradient(180deg,rgba(15,23,42,0.08),rgba(0,0,0,0.52))]" />
-          <div className="relative z-10 flex flex-col gap-5">
-            <header className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-[0.7rem] uppercase tracking-[0.45em] text-white/70">MondeFan</p>
-                <h1 className="mt-2 text-3xl font-black sm:text-5xl">Verdad o Shot</h1>
-                <p className="mt-2 max-w-2xl text-sm text-white/80 sm:text-base">
-                  Elige una categoría y empieza el turno sin scroll ni pantallas partidas.
-                </p>
-              </div>
-              <div className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90">
-                {participants.length} participantes
-              </div>
-            </header>
+      <div className="relative flex min-h-[100svh] w-full items-start justify-center overflow-y-auto bg-transparent px-4 pb-8 pt-20 text-white app-fade-up sm:px-6 sm:pt-24">
+        <div className={`relative my-auto w-full max-w-2xl ${selectionGlitch ? 'app-glitch-burst' : ''}`}>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {truthCategories.map((category) => (
-                <LiquidButton
-                  key={category.key}
-                  className="min-h-32 w-full rounded-[1.75rem] border border-white/10 bg-white/5 !px-4 !py-4 text-left shadow-[0_16px_50px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 hover:bg-white/10"
-                  onClick={(event) => {
-                    onButtonPress(event);
-                    startRound(category.key);
-                  }}
-                  size="lg"
-                  type="button"
-                  variant="cool"
-                >
-                  <div className="flex h-full flex-col justify-between gap-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-3xl leading-none">{category.emoji}</p>
-                        <h2 className="mt-3 text-xl font-black">{category.label}</h2>
-                      </div>
-                      <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[0.65rem] uppercase tracking-[0.3em] text-white/70">
-                        Elegir
-                      </span>
-                    </div>
-                    <p className="text-sm leading-relaxed text-white/78">{category.description}</p>
-                  </div>
-                </LiquidButton>
-              ))}
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <p className="text-[0.65rem] uppercase tracking-[0.5em] text-white/50">MondeFan</p>
+            <h1 className="mt-3 text-4xl font-black leading-none sm:text-6xl">
+              Verdad o Shot
+            </h1>
+            <p className="mx-auto mt-3 max-w-sm text-sm text-white/60 sm:text-base">
+              Elige una categoría para empezar.
+            </p>
+
+            {/* Badge participantes */}
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm text-white/70 backdrop-blur">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+              {participants.length} participantes listos
             </div>
+          </div>
+
+          {/* Grid de categorías */}
+          <div className="flex flex-col gap-3">
+            {truthCategories.map((category, index) => (
+              <CategoryCard
+                key={category.key}
+                category={category}
+                index={index}
+                onSelect={() => {
+                  startRound(category.key);
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
     );
   }
 
+  // ── Juego en curso ───────────────────────────────────────
   const panelTransitionClass =
     turnTransition === 'responded'
       ? 'app-choice-responded'
       : turnTransition === 'shot'
-        ? 'app-choice-shot'
-        : '';
+      ? 'app-choice-shot'
+      : '';
 
   const panelStyle = currentPlayer
     ? {
@@ -293,14 +321,12 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
         backgroundImage:
           'linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(15, 23, 42, 0.48)), radial-gradient(circle at top, rgba(255, 255, 255, 0.22), transparent 35%), radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.18), transparent 32%)',
       }
-    : {
-        backgroundColor: '#0f172a',
-      };
+    : { backgroundColor: '#0f172a' };
 
   return (
-    <div className="relative flex min-h-[100svh] w-full items-start justify-center overflow-hidden bg-transparent px-3 pb-4 pt-[5.75rem] text-white app-fade-up sm:px-4 sm:pt-24">
+    <div className="relative flex min-h-[100svh] w-full items-start justify-center overflow-y-auto bg-transparent px-3 pb-6 pt-20 text-white app-fade-up sm:px-4 sm:pt-24">
       <div
-        className={`relative flex w-full max-w-4xl flex-1 flex-col overflow-hidden rounded-[2.35rem] border border-white/12 shadow-[0_30px_100px_rgba(0,0,0,0.42)] ${panelTransitionClass}`}
+        className={`relative my-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden rounded-[2.35rem] border border-white/12 shadow-[0_30px_100px_rgba(0,0,0,0.42)] ${panelTransitionClass} ${selectionGlitch ? 'app-glitch-burst' : ''}`}
         style={panelStyle}
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_36%),linear-gradient(180deg,rgba(0,0,0,0.06),rgba(0,0,0,0.26))]" />
@@ -318,7 +344,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
                   {selectedCategory?.label}
                 </span>
                 <span className="rounded-full border border-white/15 bg-black/18 px-3 py-1 backdrop-blur">
-                  Ronda {currentTurnIndex + 1}
+                  Ronda {roundNumber}
                 </span>
                 <span className="rounded-full border border-white/15 bg-black/18 px-3 py-1 backdrop-blur">
                   Pregunta {truthDeckIndex + 1}
@@ -353,7 +379,7 @@ function TruthOrDareGame({ participants, onBackToHub, onButtonPress }: TruthOrDa
             </div>
           </header>
 
-          <main className="relative flex flex-1 items-center justify-center px-4 py-2 sm:px-8 sm:py-4">
+          <main className="relative flex flex-1 items-center justify-center px-4 py-4 sm:px-8 sm:py-6">
             {currentTruth ? (
               <div className="mx-auto max-w-2xl rounded-[2.25rem] border border-white/15 bg-black/12 px-5 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:px-8 sm:py-10">
                 <p className="text-[0.65rem] uppercase tracking-[0.5em] text-white/70">La verdad</p>
