@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import { FaFire } from 'react-icons/fa';
+import { FaFire, FaArrowLeft } from 'react-icons/fa';
 
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import { ParticipantAvatarBadge } from '@/components/ui/participant-avatar';
@@ -70,15 +70,15 @@ const getNextDeckItem = (
   };
 };
 
-// Colores accent por categoría para las tarjetas
+// Colores accent por categoría para las tarjetas (más pulidos)
 function getCategoryAccent(index: number) {
   const palette = [
-    { from: 'rgba(236,72,153,0.18)', to: 'rgba(239,68,68,0.08)',   glow: 'rgba(236,72,153,0.40)',  border: 'rgba(236,72,153,0.30)' },
-    { from: 'rgba(59,130,246,0.18)', to: 'rgba(99,102,241,0.08)',  glow: 'rgba(59,130,246,0.38)',  border: 'rgba(59,130,246,0.28)' },
-    { from: 'rgba(34,197,94,0.16)',  to: 'rgba(16,185,129,0.08)',  glow: 'rgba(34,197,94,0.36)',   border: 'rgba(34,197,94,0.26)'  },
-    { from: 'rgba(251,191,36,0.18)', to: 'rgba(249,115,22,0.08)',  glow: 'rgba(251,191,36,0.38)',  border: 'rgba(251,191,36,0.28)' },
-    { from: 'rgba(168,85,247,0.18)', to: 'rgba(236,72,153,0.08)',  glow: 'rgba(168,85,247,0.38)',  border: 'rgba(168,85,247,0.28)' },
-    { from: 'rgba(20,184,166,0.18)', to: 'rgba(59,130,246,0.08)',  glow: 'rgba(20,184,166,0.36)',  border: 'rgba(20,184,166,0.26)' },
+    { from: 'rgba(236,72,153,0.25)', to: 'rgba(239,68,68,0.12)',   glow: 'rgba(236,72,153,0.55)',  border: 'rgba(236,72,153,0.45)' },
+    { from: 'rgba(59,130,246,0.25)', to: 'rgba(99,102,241,0.12)',  glow: 'rgba(59,130,246,0.55)',  border: 'rgba(59,130,246,0.45)' },
+    { from: 'rgba(34,197,94,0.22)',  to: 'rgba(16,185,129,0.12)',  glow: 'rgba(34,197,94,0.50)',   border: 'rgba(34,197,94,0.40)'  },
+    { from: 'rgba(251,191,36,0.25)', to: 'rgba(249,115,22,0.12)',  glow: 'rgba(251,191,36,0.55)',  border: 'rgba(251,191,36,0.45)' },
+    { from: 'rgba(168,85,247,0.25)', to: 'rgba(236,72,153,0.12)',  glow: 'rgba(168,85,247,0.55)',  border: 'rgba(168,85,247,0.45)' },
+    { from: 'rgba(20,184,166,0.25)', to: 'rgba(59,130,246,0.12)',  glow: 'rgba(20,184,166,0.50)',  border: 'rgba(20,184,166,0.40)' },
   ];
   return palette[index % palette.length];
 }
@@ -98,22 +98,21 @@ function CategoryCard({
   return (
     <button
       type="button"
-      className="group relative w-full overflow-hidden rounded-[1.6rem] text-left transition-all duration-300"
+      className="group relative w-full overflow-hidden rounded-2xl text-left transition-all duration-300 active:scale-[0.98]"
       style={{
         border: `1px solid ${hovered ? accent.border : 'rgba(255,255,255,0.08)'}`,
         background: hovered
-          ? `linear-gradient(135deg, ${accent.from}, ${accent.to}), rgba(15,23,42,0.7)`
+          ? `linear-gradient(135deg, ${accent.from}, ${accent.to}), rgba(15,23,42,0.85)`
           : 'rgba(255,255,255,0.04)',
         boxShadow: hovered
-          ? `0 0 0 1px ${accent.border}, 0 20px 60px rgba(0,0,0,0.3), 0 0 80px -20px ${accent.glow}`
-          : '0 4px 24px rgba(0,0,0,0.18)',
-        transform: hovered ? 'translateY(-3px) scale(1.01)' : 'translateY(0) scale(1)',
+          ? `0 0 0 1px ${accent.border}, 0 20px 40px rgba(0,0,0,0.3), 0 0 60px -20px ${accent.glow}`
+          : '0 4px 20px rgba(0,0,0,0.2)',
+        transform: hovered ? 'translateY(-2px) scale(1.01)' : 'translateY(0) scale(1)',
       }}
       onClick={onSelect}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Brillo superior */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-px transition-opacity duration-300"
         style={{
@@ -121,9 +120,7 @@ function CategoryCard({
           opacity: hovered ? 1 : 0,
         }}
       />
-
       <div className="flex items-center gap-4 px-5 py-5">
-        {/* Emoji con halo */}
         <div
           className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-3xl transition-all duration-300"
           style={{
@@ -131,26 +128,15 @@ function CategoryCard({
               ? `radial-gradient(circle, ${accent.from} 0%, rgba(0,0,0,0.3) 100%)`
               : 'rgba(255,255,255,0.06)',
             boxShadow: hovered ? `0 0 30px ${accent.glow}` : 'none',
-            transform: hovered ? 'scale(1.12)' : 'scale(1)',
+            transform: hovered ? 'scale(1.08)' : 'scale(1)',
           }}
         >
           {category.emoji}
         </div>
-
-        {/* Texto */}
         <div className="min-w-0 flex-1">
-          <p
-            className="text-base font-black leading-tight tracking-tight transition-colors duration-200"
-            style={{ color: hovered ? '#fff' : 'rgba(255,255,255,0.9)' }}
-          >
-            {category.label}
-          </p>
-          <p className="mt-1 text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.52)' }}>
-            {category.description}
-          </p>
+          <p className="text-base font-black tracking-tight text-white">{category.label}</p>
+          <p className="mt-1 text-xs text-white/50">{category.description}</p>
         </div>
-
-        {/* Flecha */}
         <div
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300"
           style={{
@@ -175,8 +161,6 @@ function CategoryCard({
 }
 
 function TruthOrRetoGame({ participants, onBackToHub, onButtonPress }: TruthOrRetoGameProps) {
-  void onBackToHub;
-
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<TruthCategoryKey | null>(null);
   const [turnOrder, setTurnOrder] = useState<string[]>([]);
   const [currentTurnIndex, setCurrentTurnIndex] = useState(0);
@@ -198,36 +182,27 @@ function TruthOrRetoGame({ participants, onBackToHub, onButtonPress }: TruthOrRe
       ? participants.find((p) => p.id === turnOrder[currentTurnIndex])
       : null;
 
-  useEffect(
-    () => () => {
-      if (turnTimerRef.current !== null) window.clearTimeout(turnTimerRef.current);
-    },
-    [],
-  );
-
+  // Limpiar temporizador al desmontar
   useEffect(() => {
-    if (!selectionGlitch) {
-      return undefined;
-    }
+    return () => {
+      if (turnTimerRef.current !== null) window.clearTimeout(turnTimerRef.current);
+    };
+  }, []);
 
-    const timeout = window.setTimeout(() => {
-      setSelectionGlitch(false);
-    }, 420);
-
+  // Efecto para la animación de glitch
+  useEffect(() => {
+    if (!selectionGlitch) return;
+    const timeout = window.setTimeout(() => setSelectionGlitch(false), 420);
     return () => window.clearTimeout(timeout);
   }, [selectionGlitch]);
 
   const triggerSelectionGlitch = () => {
     setSelectionGlitch(false);
-    window.requestAnimationFrame(() => {
-      setSelectionGlitch(true);
-    });
+    window.requestAnimationFrame(() => setSelectionGlitch(true));
   };
 
   const drawNextPrompt = (kind: PromptKind) => {
-    if (!selectedCategoryKey) {
-      return '';
-    }
+    if (!selectedCategoryKey) return '';
 
     if (kind === 'truth') {
       const result = getNextDeckItem(
@@ -257,15 +232,18 @@ function TruthOrRetoGame({ participants, onBackToHub, onButtonPress }: TruthOrRe
       turnTimerRef.current = null;
     }
     triggerSelectionGlitch();
+
     const nextOrder = shuffleList(participants.map((p) => p.id));
-    const nextDeck  = shuffleList(truthCategoryMap[categoryKey].questions);
+    const truthQuestions = truthCategoryMap[categoryKey].questions;
+    const dareQuestions = dareChallengesByCategory[categoryKey];
+
     setSelectedCategoryKey(categoryKey);
     setTurnOrder(nextOrder);
     setCurrentTurnIndex(0);
     setRoundNumber(1);
-    setTruthDeck(nextDeck);
+    setTruthDeck(shuffleList(truthQuestions));
     setTruthDeckIndex(0);
-    setDareDeck(shuffleList(dareChallengesByCategory[categoryKey]));
+    setDareDeck(shuffleList(dareQuestions));
     setDareDeckIndex(0);
     setCurrentPromptKind(null);
     setCurrentPrompt('');
@@ -282,10 +260,12 @@ function TruthOrRetoGame({ participants, onBackToHub, onButtonPress }: TruthOrRe
     setTurnOutcome(null);
     setCurrentPromptKind(null);
     setCurrentPrompt('');
+
     setCurrentTurnIndex((cur) => {
       if (turnOrder.length === 0) return 0;
       const next = cur + 1;
       if (next < turnOrder.length) return next;
+      // Nueva ronda
       setRoundNumber((r) => r + 1);
       setTurnOrder(shuffleList(participants.map((p) => p.id)));
       return 0;
@@ -309,6 +289,7 @@ function TruthOrRetoGame({ participants, onBackToHub, onButtonPress }: TruthOrRe
       id: Date.now(),
       emoji: kind === 'truth' ? pickRandom(respondedEmojis) : '\u{1F525}',
     });
+
     turnTimerRef.current = window.setTimeout(() => {
       setTurnOutcome(null);
       turnTimerRef.current = null;
@@ -317,69 +298,84 @@ function TruthOrRetoGame({ participants, onBackToHub, onButtonPress }: TruthOrRe
 
   const finishPrompt = () => {
     if (currentPromptKind === null) return;
-
     if (turnTimerRef.current !== null) {
       window.clearTimeout(turnTimerRef.current);
       turnTimerRef.current = null;
     }
-
     advanceTurn();
   };
 
-  // ── Sin participantes ────────────────────────────────────
+  const handleExit = (event: ReactMouseEvent<HTMLElement>) => {
+    onButtonPress(event);
+    setSelectedCategoryKey(null);
+    setTurnOrder([]);
+    setCurrentTurnIndex(0);
+    setRoundNumber(1);
+    setCurrentPromptKind(null);
+    setCurrentPrompt('');
+    setTurnTransition(null);
+    setTurnOutcome(null);
+    if (turnTimerRef.current) window.clearTimeout(turnTimerRef.current);
+  };
+
+  // Pantalla sin participantes
   if (participants.length < 2) {
     return (
-      <div className="flex min-h-[100svh] items-center justify-center px-4 text-center text-white app-fade-up">
-        <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-slate-950/85 p-8 shadow-2xl backdrop-blur-2xl">
-          <p className="text-2xl font-black">No hay participantes disponibles.</p>
-          <p className="mt-2 text-slate-200">Vuelve al hub y agrega al menos 2 jugadores.</p>
+      <div className="flex h-screen items-center justify-center px-4 text-center text-white">
+        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-black/80 p-6 backdrop-blur-2xl">
+          <p className="text-2xl font-black">No hay suficientes participantes</p>
+          <p className="mt-2 text-stone-300">Necesitas al menos 2 jugadores.</p>
+          <LiquidButton
+            className="mt-6 w-full py-3 text-base"
+            onClick={(event) => {
+              onButtonPress(event);
+              onBackToHub();
+            }}
+            size="lg"
+            variant="cool"
+          >
+            Volver al hub
+          </LiquidButton>
         </div>
       </div>
     );
   }
 
-  // ── Selección de categoría ───────────────────────────────
+  // Pantalla de selección de categoría
   if (!selectedCategoryKey) {
     return (
-      <div className="relative flex min-h-[100svh] w-full items-start justify-center overflow-y-auto bg-transparent px-4 pb-8 pt-20 text-white app-fade-up sm:px-6 sm:pt-24">
-        <div className={`relative my-auto w-full max-w-2xl ${selectionGlitch ? 'app-glitch-burst' : ''}`}>
-
-          {/* Header */}
-          <div className="mb-8 text-center">
-            <p className="text-[0.65rem] uppercase tracking-[0.5em] text-white/50">MondeFan</p>
-            <h1 className="mt-3 text-4xl font-black leading-none sm:text-6xl">
-              Verdad o Reto
-            </h1>
-            <p className="mx-auto mt-3 max-w-sm text-sm text-white/60 sm:text-base">
-              Elige una categoría para empezar.
-            </p>
-
-            {/* Badge participantes */}
-            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm text-white/70 backdrop-blur">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-              {participants.length} participantes listos
+      <div className="flex h-screen w-full flex-col overflow-hidden bg-black px-4 py-6 text-white">
+        <div className={`flex-1 overflow-y-auto pb-6 ${selectionGlitch ? 'app-glitch-burst' : ''}`}>
+          <div className="mx-auto w-full max-w-2xl">
+            <div className="mb-8 text-center">
+              <p className="text-xs uppercase tracking-[0.5em] text-white/50">MondeFan</p>
+              <h1 className="mt-3 text-4xl font-black sm:text-6xl">Verdad o Reto</h1>
+              <p className="mx-auto mt-3 max-w-sm text-sm text-white/60">
+                Elige una categoría para empezar.
+              </p>
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm backdrop-blur">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+                {participants.length} participantes listos
+              </div>
             </div>
-          </div>
 
-          {/* Grid de categorías */}
-          <div className="flex flex-col gap-3">
-            {truthCategories.map((category, index) => (
-              <CategoryCard
-                key={category.key}
-                category={category}
-                index={index}
-                onSelect={() => {
-                  startRound(category.key);
-                }}
-              />
-            ))}
+            <div className="flex flex-col gap-3">
+              {truthCategories.map((category, idx) => (
+                <CategoryCard
+                  key={category.key}
+                  category={category}
+                  index={idx}
+                  onSelect={() => startRound(category.key)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  // ── Juego en curso ───────────────────────────────────────
+  // Juego en curso
   const panelTransitionClass =
     turnTransition === 'truth'
       ? 'app-choice-responded'
@@ -387,157 +383,157 @@ function TruthOrRetoGame({ participants, onBackToHub, onButtonPress }: TruthOrRe
       ? 'app-choice-shot'
       : '';
 
+  // Fondo dinámico con overlay oscuro para contraste
   const panelStyle = currentPlayer
     ? {
         backgroundColor: currentPlayer.color,
-        backgroundImage:
-          'linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(15, 23, 42, 0.48)), radial-gradient(circle at top, rgba(255, 255, 255, 0.22), transparent 35%), radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.18), transparent 32%)',
+        backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(15,23,42,0.8) 100%), radial-gradient(circle at top, rgba(255,255,255,0.15), transparent 50%)`,
       }
     : { backgroundColor: '#0f172a' };
 
   return (
-    <div className="relative flex min-h-[100svh] w-full items-start justify-center overflow-y-auto bg-transparent px-3 pb-6 pt-20 text-white app-fade-up sm:px-4 sm:pt-24">
+    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-black">
       <div
-        className={`relative my-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden rounded-[2.35rem] border border-white/12 shadow-[0_30px_100px_rgba(0,0,0,0.42)] ${panelTransitionClass} ${selectionGlitch ? 'app-glitch-burst' : ''}`}
+        className={`relative flex h-full w-full flex-col overflow-hidden rounded-none shadow-2xl ${panelTransitionClass} ${selectionGlitch ? 'app-glitch-burst' : ''}`}
         style={panelStyle}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_36%),linear-gradient(180deg,rgba(0,0,0,0.06),rgba(0,0,0,0.26))]" />
-        <div className="absolute inset-x-0 top-0 h-24 bg-white/10 blur-3xl" />
+        {/* Overlay de luz ambiental */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_50%)] pointer-events-none" />
 
-        <div className="relative z-10 flex flex-1 flex-col">
-          <header className="flex flex-col gap-4 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0 flex-1">
-              <p className="text-[0.7rem] uppercase tracking-[0.45em] text-white/75">Verdad o Reto</p>
-              <h2 className="mt-2 truncate text-3xl font-black sm:text-5xl">
-                {currentPlayer?.name ?? 'Preparando ronda...'}
-              </h2>
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-white/90">
-                <span className="rounded-full border border-white/15 bg-black/18 px-3 py-1 backdrop-blur">
-                  {selectedCategory?.label}
-                </span>
-                <span className="rounded-full border border-white/15 bg-black/18 px-3 py-1 backdrop-blur">
-                  Ronda {roundNumber}
-                </span>
-                <span className="rounded-full border border-white/15 bg-black/18 px-3 py-1 backdrop-blur">
-                  {currentPromptKind ? currentPromptKind === 'truth' ? 'Verdad' : 'Reto' : 'Elige'}
-                </span>
-                <span className="rounded-full border border-white/15 bg-black/18 px-3 py-1 backdrop-blur">
-                  {turnOrder.length} jugadores
-                </span>
-              </div>
-            </div>
+        {/* Header con botón de salir */}
+        <header className="relative z-10 flex shrink-0 items-center justify-between gap-3 px-4 pt-6 pb-2 sm:px-6">
+          <button
+            type="button"
+            onClick={handleExit}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur transition hover:bg-white/10 active:scale-95"
+          >
+            <FaArrowLeft className="h-5 w-5" />
+          </button>
+          <div className="flex flex-wrap items-center justify-end gap-2 text-right">
+            <span className="rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs backdrop-blur">
+              {selectedCategory?.label}
+            </span>
+            <span className="rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs backdrop-blur">
+              Ronda {roundNumber}
+            </span>
+          </div>
+        </header>
 
-            <div className="flex shrink-0 items-center gap-3 self-start rounded-[1.75rem] border border-white/15 bg-black/18 p-3 backdrop-blur-sm">
-              <div className="min-w-0">
-                <p className="text-[0.65rem] uppercase tracking-[0.35em] text-white/65">Turno</p>
-                <p className="mt-1 max-w-[11rem] truncate text-lg font-bold">
-                  {currentPlayer?.name ?? 'Preparando'}
-                </p>
-              </div>
-              {currentPlayer ? (
+        {/* Info del jugador actual */}
+        <div className="relative z-10 shrink-0 px-4 sm:px-6">
+          <div className="flex items-center gap-4 rounded-2xl border border-white/15 bg-black/30 p-4 backdrop-blur">
+            {currentPlayer ? (
+              <>
                 <ParticipantAvatarBadge
                   alt={currentPlayer.name}
                   avatar={currentPlayer.avatar}
                   backgroundColor={currentPlayer.color}
-                  className="h-16 w-16"
                   seed={currentPlayer.avatarSeed}
-                  sizeClassName="h-16 w-16"
+                  sizeClassName="h-14 w-14 sm:h-16 sm:w-16"
                 />
-              ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/15 bg-white/10 text-sm font-black">
-                  ?
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs uppercase tracking-wider text-white/60">Turno de</p>
+                  <p className="truncate text-2xl font-black text-white sm:text-3xl">
+                    {currentPlayer.name}
+                  </p>
                 </div>
-              )}
-            </div>
-          </header>
-
-          <main className="relative flex flex-1 items-center justify-center px-4 py-4 sm:px-8 sm:py-6">
-            {currentPromptKind && currentPrompt ? (
-              <div className="mx-auto max-w-2xl rounded-[2.25rem] border border-white/15 bg-black/12 px-5 py-6 text-center shadow-[0_20px_60px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:px-8 sm:py-10">
-                <p className="text-[0.65rem] uppercase tracking-[0.5em] text-white/70">
-                  {currentPromptKind === 'truth' ? 'La verdad' : 'El reto'}
-                </p>
-                <p className="mt-4 text-balance text-3xl font-black leading-tight text-white sm:text-5xl">
-                  {currentPrompt}
-                </p>
-              </div>
-            ) : (
-              <div className="mx-auto max-w-xl rounded-[2rem] border border-dashed border-white/18 bg-black/12 px-6 py-8 text-center backdrop-blur-sm">
-                <p className="text-2xl font-black sm:text-3xl">Elige verdad o reto</p>
-                <p className="mt-2 text-sm text-white/80 sm:text-base">
-                  La categoría ya está lista. Ahora toca decidir cómo quieres pasar el turno.
-                </p>
-              </div>
-            )}
-          </main>
-
-          <footer className="grid grid-cols-2 gap-3 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-6">
-            {currentPromptKind === null ? (
-              <>
-                <LiquidButton
-                  className="!min-h-14 rounded-[1.5rem] border border-white/15 bg-white/10 !px-4 !py-3 text-base font-black text-white shadow-[0_14px_40px_rgba(0,0,0,0.22)] backdrop-blur-sm transition hover:bg-white/15 sm:!min-h-16 sm:text-lg"
-                  disabled={!currentPlayer}
-                  onClick={(event) => {
-                    onButtonPress(event);
-                    revealPrompt('truth');
-                  }}
-                  size="lg"
-                  type="button"
-                  variant="default"
-                >
-                  Verdad
-                </LiquidButton>
-
-                <LiquidButton
-                  className="!min-h-14 rounded-[1.5rem] border border-amber-200/30 bg-gradient-to-r from-amber-300 via-orange-400 to-rose-500 !px-4 !py-3 text-base font-black text-white shadow-[0_18px_50px_rgba(249,115,22,0.35)] transition hover:brightness-110 sm:!min-h-16 sm:text-lg"
-                  disabled={!currentPlayer}
-                  onClick={(event) => {
-                    onButtonPress(event);
-                    revealPrompt('dare');
-                  }}
-                  size="lg"
-                  type="button"
-                  variant="cool"
-                >
-                  Reto
-                </LiquidButton>
               </>
             ) : (
+              <div className="flex items-center gap-3">
+                <div className="h-14 w-14 animate-pulse rounded-full border border-white/20 bg-white/10" />
+                <div className="h-8 w-32 animate-pulse rounded-lg bg-white/10" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Contenido principal (pregunta/reto o selector) */}
+        <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 py-6 sm:px-8">
+          {currentPromptKind && currentPrompt ? (
+            <div className="w-full max-w-2xl rounded-2xl border border-white/15 bg-black/40 p-6 text-center backdrop-blur-sm sm:p-8">
+              <p className="text-xs uppercase tracking-[0.3em] text-white/70">
+                {currentPromptKind === 'truth' ? 'Verdad' : 'Reto'}
+              </p>
+              <p className="mt-4 text-xl font-black leading-tight text-white sm:text-3xl md:text-4xl">
+                {currentPrompt}
+              </p>
+            </div>
+          ) : (
+            <div className="w-full max-w-xl rounded-2xl border border-dashed border-white/20 bg-black/30 p-6 text-center backdrop-blur-sm">
+              <p className="text-xl font-black text-white sm:text-2xl">Elige verdad o reto</p>
+              <p className="mt-2 text-sm text-white/70">
+                La categoría ya está lista. Toca decidir.
+              </p>
+            </div>
+          )}
+        </main>
+
+        {/* Botones de acción */}
+        <footer className="relative z-10 shrink-0 grid grid-cols-2 gap-3 px-4 pb-6 sm:px-6">
+          {currentPromptKind === null ? (
+            <>
               <LiquidButton
-                className="col-span-2 !min-h-14 rounded-[1.5rem] border border-white/15 bg-white/10 !px-4 !py-3 text-base font-black text-white shadow-[0_14px_40px_rgba(0,0,0,0.22)] backdrop-blur-sm transition hover:bg-white/15 sm:!min-h-16 sm:text-lg"
+                className="min-h-[56px] rounded-xl border border-white/20 bg-white/10 text-base font-black text-white shadow-lg backdrop-blur active:scale-95"
                 disabled={!currentPlayer}
                 onClick={(event) => {
                   onButtonPress(event);
-                  finishPrompt();
+                  revealPrompt('truth');
                 }}
                 size="lg"
                 type="button"
                 variant="default"
               >
-                Siguiente jugador
+                Verdad
               </LiquidButton>
-            )}
-          </footer>
-        </div>
 
-        {turnOutcome?.kind === 'truth' ? (
-          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/12 backdrop-blur-[2px]">
-            <div className="app-feedback-responded flex items-center justify-center text-[clamp(5rem,30vw,14rem)] leading-none drop-shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
-              {turnOutcome.emoji}
-            </div>
+              <LiquidButton
+                className="min-h-[56px] rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-600 text-base font-black text-white shadow-lg active:scale-95"
+                disabled={!currentPlayer}
+                onClick={(event) => {
+                  onButtonPress(event);
+                  revealPrompt('dare');
+                }}
+                size="lg"
+                type="button"
+                variant="cool"
+              >
+                Reto
+              </LiquidButton>
+            </>
+          ) : (
+            <LiquidButton
+              className="col-span-2 min-h-[56px] rounded-xl border border-white/20 bg-white/10 text-base font-black text-white backdrop-blur active:scale-95"
+              disabled={!currentPlayer}
+              onClick={(event) => {
+                onButtonPress(event);
+                finishPrompt();
+              }}
+              size="lg"
+              type="button"
+              variant="default"
+            >
+              Siguiente jugador
+            </LiquidButton>
+          )}
+        </footer>
+
+        {/* Efectos de overlay al responder */}
+        {turnOutcome?.kind === 'truth' && (
+          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div className="animate-bounce text-9xl drop-shadow-2xl">{turnOutcome.emoji}</div>
           </div>
-        ) : null}
+        )}
 
-        {turnOutcome?.kind === 'dare' ? (
-          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/22 backdrop-blur-[3px]">
-            <div className="app-feedback-shot app-shot-burst flex flex-col items-center justify-center rounded-[2.5rem] border border-white/25 bg-[linear-gradient(135deg,rgba(255,255,255,0.2),rgba(251,191,36,0.28),rgba(239,68,68,0.42))] px-8 py-7 text-center shadow-[0_30px_90px_rgba(0,0,0,0.42)]">
-              <FaFire className="text-4xl text-amber-200 drop-shadow-[0_8px_18px_rgba(0,0,0,0.35)] sm:text-5xl" />
-              <span className="mt-3 block text-[clamp(4rem,26vw,10rem)] font-black tracking-[0.2em] text-white drop-shadow-[0_12px_32px_rgba(0,0,0,0.52)]">
+        {turnOutcome?.kind === 'dare' && (
+          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-md">
+            <div className="flex flex-col items-center rounded-2xl border border-white/30 bg-gradient-to-br from-amber-500/40 to-rose-600/40 px-8 py-6 text-center shadow-2xl backdrop-blur">
+              <FaFire className="text-5xl text-yellow-300 drop-shadow-lg" />
+              <span className="mt-2 text-8xl font-black tracking-wider text-white drop-shadow-2xl">
                 RETO!
               </span>
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );
