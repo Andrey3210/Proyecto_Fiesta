@@ -37,7 +37,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
         style: {
           backgroundColor: participant.color,
           textColor: '#f8fafc',
-          fontSize: 30,
+          fontSize: participant.name.length > 18 ? 20 : participant.name.length > 12 ? 24 : 30,
           fontWeight: 900,
         },
       })),
@@ -174,7 +174,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
             </LiquidButton>
           </section>
 
-          <aside ref={resultPanelRef} className="rounded-[2rem] border border-white/10 bg-white/5 p-4 text-center shadow-inner shadow-black/20 sm:p-6">
+            <aside ref={resultPanelRef} className="rounded-[2rem] border border-white/10 bg-white/5 p-4 text-center shadow-inner shadow-black/20 sm:p-6">
             <p className="text-sm uppercase tracking-[0.4em] text-white/70">Resultado</p>
             {selected ? (
               <div className="mt-6 app-fade-up">
@@ -188,7 +188,10 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
                     sizeClassName="h-28 w-28"
                   />
                 </div>
-                <p className="mt-5 text-3xl font-black" style={{ color: selected.color }}>
+                <p
+                  className="mx-auto mt-5 max-w-full break-words px-2 text-2xl font-black leading-tight sm:text-3xl"
+                  style={{ color: selected.color }}
+                >
                   {selected.name}
                 </p>
                 <p className="mt-3 text-slate-100">La rueda cayó aquí.</p>

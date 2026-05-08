@@ -7,7 +7,7 @@ import RadialOrbitalTimeline, {
 
 import type { Participant } from '../App';
 
-type GameMode = 'roulette' | 'truth' | 'impostor';
+type GameMode = 'roulette' | 'truth' | 'reto' | 'impostor';
 
 type GameHubProps = {
   participants: Participant[];
@@ -52,12 +52,23 @@ const timelineData: TimelineItem[] = [
   },
   {
     id: 4,
+    title: 'Verdad o Reto',
+    date: 'Jugar ahora',
+    content: 'Verdades, retos y ritmo directo.',
+    category: 'Verdad o Reto',
+    icon: () => <span className="text-xl">🎲</span>,
+    relatedIds: [1, 2, 3],
+    status: 'in-progress',
+    energy: 86,
+  },
+  {
+    id: 5,
     title: 'Próximamente',
     date: 'Muy pronto',
     content: 'Tienes un comodín de 2 nuevos juegos porque no me alcanzó tiempo :(',
     category: 'Próximamente',
     icon: FaClock,
-    relatedIds: [1, 2, 3],
+    relatedIds: [1, 2, 3, 4],
     status: 'pending',
     energy: 65,
   },
@@ -97,6 +108,10 @@ function GameHub({
 
           if (item.id === 3) {
             onSelectGame('impostor');
+          }
+
+          if (item.id === 4) {
+            onSelectGame('reto');
           }
         }}
         onNodePress={onButtonPress}

@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import {
-  FaEdit,
-  FaTrash,
-} from 'react-icons/fa';
+import { FaEdit, FaTrash } from 'react-icons/fa';
+
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import { ParticipantAvatarBadge } from '@/components/ui/participant-avatar';
+
 import type { Participant } from '../App';
 
 type WelcomeScreenProps = {
@@ -80,38 +79,41 @@ function WelcomeScreen({
   }, [editingId]);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center overflow-hidden bg-transparent px-4 py-10 text-white">
+    <div className="relative flex min-h-screen flex-col items-center justify-start overflow-y-auto bg-transparent px-3 py-4 text-white sm:justify-center sm:px-4 sm:py-10">
       <div className="pointer-events-none absolute inset-0" style={welcomeBackdropStyle} />
       <div className="pointer-events-none absolute -left-16 top-20 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-4 right-0 h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
+
       <div className="w-full max-w-5xl app-fade-up">
-        <div className="mb-8 text-center">
-          <p className="mb-2 text-sm uppercase tracking-[0.5em] text-cyan-100/80">
+        <div className="mb-5 text-center sm:mb-8">
+          <p className="mb-2 text-xs uppercase tracking-[0.45em] text-cyan-100/80 sm:text-sm sm:tracking-[0.55em]">
             MondeFan
           </p>
-          <h1 className="text-5xl font-black tracking-tight">Feliz Cumpleaños Mala! 🥳</h1>
-          <p className="mt-3 text-lg text-slate-200">
+          <h1 className="mx-auto w-full max-w-[16ch] text-4xl font-black tracking-[-0.04em] leading-[0.92] drop-shadow-[0_8px_24px_rgba(34,211,238,0.22)] sm:max-w-[20ch] sm:text-6xl lg:max-w-[24ch] lg:text-7xl">
+            Feliz Cumpleaños Mala! 🥳
+          </h1>
+          <p className="mx-auto mt-3 w-full max-w-[30ch] text-base font-medium leading-relaxed text-slate-100/95 sm:max-w-[36ch] sm:text-xl sm:leading-8">
             Esta app es un regalo para Tuti.
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <section className="rounded-3xl border border-white/10 bg-slate-950/70 p-6 text-white shadow-2xl backdrop-blur-2xl app-fade-up">
+        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr] sm:gap-6">
+          <section className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 text-white shadow-2xl backdrop-blur-2xl app-fade-up sm:p-6">
             <div className="mb-4 flex flex-col gap-2">
-              <label className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-300/80">
+              <label className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300/80 sm:text-sm">
                 Nombre del participante
               </label>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   ref={inputRef}
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-lg text-white outline-none transition placeholder:text-slate-400 focus:border-cyan-300/50 focus:ring-4 focus:ring-cyan-300/10"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-cyan-300/50 focus:ring-4 focus:ring-cyan-300/10 sm:text-lg"
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Escribe un nombre"
                   type="text"
                   value={name}
                 />
                 <LiquidButton
-                  className="w-full sm:w-auto"
+                  className="h-12 w-full text-sm sm:h-16 sm:w-auto sm:text-lg"
                   onClick={(event) => {
                     onButtonPress(event);
                     handleSubmit();
@@ -123,34 +125,41 @@ function WelcomeScreen({
                   {editingId ? 'Guardar cambio' : 'Agregar'}
                 </LiquidButton>
               </div>
-              <p className="text-sm text-slate-300">
-                Total de participantes: <span className="font-semibold text-white">{participants.length}</span>
+              <p className="text-xs text-slate-300 sm:text-sm">
+                Total de participantes:{' '}
+                <span className="font-semibold text-white">{participants.length}</span>
               </p>
             </div>
 
-            <ul className="space-y-3">
+            <ul className="space-y-2 sm:space-y-3">
               {participants.map((participant) => (
                 <li
                   key={participant.id}
-                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+                  className="flex items-center justify-between gap-2 overflow-hidden rounded-2xl border border-white/10 bg-white/5 px-3 py-3 sm:gap-3 sm:px-4"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
                     <ParticipantAvatarBadge
                       avatar={participant.avatar}
                       backgroundColor={participant.color}
                       seed={participant.avatarSeed}
                       alt={participant.name}
+                      sizeClassName="h-10 w-10 sm:h-12 sm:w-12"
                     />
-                    <div>
-                      <p className="font-semibold text-white">{participant.name}</p>
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-300/70">
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="block max-w-[8.5rem] truncate text-sm font-semibold leading-tight text-white sm:max-w-[11rem] sm:text-base"
+                        title={participant.name}
+                      >
+                        {participant.name}
+                      </p>
+                      <p className="text-[0.65rem] uppercase tracking-[0.18em] text-slate-300/70 sm:text-xs sm:tracking-[0.2em]">
                         Avatar
                       </p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex shrink-0 gap-2">
                     <LiquidButton
-                      className="rounded-full bg-transparent text-blue-200 hover:text-white"
+                      className="h-9 w-9 rounded-full bg-transparent text-blue-200 hover:text-white sm:h-10 sm:w-10"
                       onClick={(event) => {
                         onButtonPress(event);
                         handleEdit(participant);
@@ -162,7 +171,7 @@ function WelcomeScreen({
                       <FaEdit />
                     </LiquidButton>
                     <LiquidButton
-                      className="rounded-full bg-transparent text-red-200 hover:text-white"
+                      className="h-9 w-9 rounded-full bg-transparent text-red-200 hover:text-white sm:h-10 sm:w-10"
                       onClick={(event) => {
                         onButtonPress(event);
                         handleDelete(participant.id);
@@ -180,7 +189,7 @@ function WelcomeScreen({
 
             <div className="mt-6">
               <LiquidButton
-                className="w-full"
+                className="h-12 w-full text-sm sm:h-16 sm:text-lg"
                 disabled={participants.length < 2}
                 onClick={(event) => {
                   onButtonPress(event);
@@ -193,12 +202,11 @@ function WelcomeScreen({
                 Jugar
               </LiquidButton>
 
-              <p className="mt-3 text-sm text-slate-300">
+              <p className="mt-3 text-xs text-slate-300 sm:text-sm">
                 Necesitas 2 o mas participantes para empezar a jugar.
               </p>
             </div>
           </section>
-
         </div>
       </div>
     </div>

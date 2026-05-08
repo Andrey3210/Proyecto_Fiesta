@@ -6,6 +6,7 @@ import ImpostorGame from './components/ImpostorGame';
 import Roulette from './components/Roulette';
 import WelcomeScreen from './components/WelcomeScreen';
 import TruthOrDareGame from './components/TruthOrDareGame';
+import TruthOrRetoGame from './components/TruthOrRetoGame';
 import FloatingBackButton from '@/components/ui/floating-back-button';
 import { LiquidButton } from '@/components/ui/liquid-glass-button';
 import DigitalGlitch from '@/components/ui/digital-glitch';
@@ -24,7 +25,7 @@ export type Participant = {
 };
 
 type Stage = 'welcome' | 'hub' | 'game';
-type GameMode = 'roulette' | 'truth' | 'impostor';
+type GameMode = 'roulette' | 'truth' | 'reto' | 'impostor';
 
 type ButtonPulse = {
   x: number;
@@ -180,6 +181,15 @@ function App() {
             rgbShift: 0.028,
             scanlineDensity: 900,
             scanlineOpacity: 0.22,
+          }
+        : gameMode === 'reto'
+        ? {
+            baseColor: '#f59e0b',
+            speed: 1.02,
+            glitchIntensity: 0.56,
+            rgbShift: 0.017,
+            scanlineDensity: 1140,
+            scanlineOpacity: 0.16,
           }
         : gameMode === 'impostor'
         ? {
@@ -352,7 +362,7 @@ function App() {
           </LiquidButton>
         </div>
       )}
-      <div key={`games-${stage}-${gameMode}`} className="app-stage-in pt-20 sm:pt-24">
+      <div key={`games-${stage}-${gameMode}`} className="app-stage-in">
         {stage === 'hub' ? (
           <GameHub
             participants={participants}
@@ -363,24 +373,44 @@ function App() {
               setStage('game');
             }}
           />
-        ) : gameMode === 'roulette' ? (
-          <Roulette
-            participants={participants}
-            onButtonPress={triggerButtonPulse}
-            onBackToHub={() => setPendingExit('hub')}
-          />
-        ) : gameMode === 'truth' ? (
-          <TruthOrDareGame
-            participants={participants}
-            onButtonPress={triggerButtonPulse}
-            onBackToHub={() => setPendingExit('hub')}
-          />
         ) : (
-          <ImpostorGame
-            participants={participants}
-            onButtonPress={triggerButtonPulse}
-            onBackToHub={() => setPendingExit('hub')}
-          />
+          (() => {
+            switch (gameMode) {
+              case 'roulette':
+                return (
+                  <Roulette
+                    participants={participants}
+                    onButtonPress={triggerButtonPulse}
+                    onBackToHub={() => setPendingExit('hub')}
+                  />
+                );
+              case 'truth':
+                return (
+                  <TruthOrDareGame
+                    participants={participants}
+                    onButtonPress={triggerButtonPulse}
+                    onBackToHub={() => setPendingExit('hub')}
+                  />
+                );
+              case 'reto':
+                return (
+                  <TruthOrRetoGame
+                    participants={participants}
+                    onButtonPress={triggerButtonPulse}
+                    onBackToHub={() => setPendingExit('hub')}
+                  />
+                );
+              case 'impostor':
+              default:
+                return (
+                  <ImpostorGame
+                    participants={participants}
+                    onButtonPress={triggerButtonPulse}
+                    onBackToHub={() => setPendingExit('hub')}
+                  />
+                );
+            }
+          })()
         )}
       </div>
 

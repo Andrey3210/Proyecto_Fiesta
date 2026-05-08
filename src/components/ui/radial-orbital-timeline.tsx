@@ -267,6 +267,7 @@ export default function RadialOrbitalTimeline({
                       background: `radial-gradient(circle, ${
                         item.category === 'Ruleta'           ? 'rgba(236,72,153,0.45)'
                         : item.category === 'Verdad o Shot'  ? 'rgba(59,130,246,0.45)'
+                        : item.category === 'Verdad o Reto'  ? 'rgba(251,191,36,0.45)'
                         : item.category === 'Impostor'       ? 'rgba(34,197,94,0.35)'
                         :                                      'rgba(251,191,36,0.35)'
                       } 0%, rgba(0,0,0,0) 72%)`,
