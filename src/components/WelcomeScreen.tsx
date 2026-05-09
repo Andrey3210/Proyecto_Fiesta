@@ -79,7 +79,7 @@ function WelcomeScreen({
   }, [editingId]);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-start overflow-y-auto bg-transparent px-3 py-4 text-white sm:justify-center sm:px-4 sm:py-10">
+    <div className="relative flex min-h-screen flex-col items-center justify-start overflow-y-auto bg-transparent px-3 pt-20 pb-4 text-white sm:px-4 sm:pt-24 sm:pb-10">
       <div className="pointer-events-none absolute inset-0" style={welcomeBackdropStyle} />
       <div className="pointer-events-none absolute -left-16 top-20 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-4 right-0 h-64 w-64 rounded-full bg-fuchsia-500/10 blur-3xl" />

@@ -1,4 +1,5 @@
 export type ImpostorCategoryKey =
+  | 'entre_nosotros'
   | 'animales'
   | 'lugares'
   | 'comidas'
@@ -32,15 +33,10 @@ type ImpostorCategoryDefinition = ImpostorCategoryMeta & {
   key: ImpostorCategoryKey;
 };
 
-const makeExtraSecrets = (seeds: readonly ImpostorSecret[]): ImpostorSecret[] =>
-  seeds.flatMap((secret) => [
-    secret,
-    { answer: `${secret.answer} chico`, clue: `mini ${secret.clue}` },
-    { answer: `${secret.answer} gigante`, clue: `giga ${secret.clue}` },
-  ]);
 
 // 50 palabras base por categoría con pistas de máximo 3 palabras (ingeniosas)
 const baseWords: Record<ImpostorCategoryKey, ImpostorSecret[]> = {
+  entre_nosotros: [],
   animales: [
     { answer: 'Perro', clue: 'ladra y muerde' },
     { answer: 'Gato', clue: 'maúlla, independiente' },
@@ -771,13 +767,8 @@ const baseWords: Record<ImpostorCategoryKey, ImpostorSecret[]> = {
   ],
 };
 
-// Generar las palabras extra (versiones chico/gigante) a partir de las bases
-const extraWordsByCategory: Record<ImpostorCategoryKey, ImpostorSecret[]> = {} as any;
-for (const key of Object.keys(baseWords) as ImpostorCategoryKey[]) {
-  extraWordsByCategory[key] = makeExtraSecrets(baseWords[key]);
-}
-
 export const impostorCategoryOrder = [
+  'entre_nosotros',
   'animales',
   'lugares',
   'comidas',
@@ -795,13 +786,21 @@ export const impostorCategoryOrder = [
 ] as const satisfies readonly ImpostorCategoryKey[];
 
 const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
+  entre_nosotros: {
+    label: 'Entre nosotros',
+    description: 'Los nombres salen de los participantes que están jugando.',
+    accent: '#f97316',
+    panel: 'from-orange-500/20 via-amber-500/14 to-red-500/10',
+    emoji: '\u{1F465}',
+    words: baseWords.entre_nosotros,
+  },
   animales: {
     label: 'Animales',
     description: 'Animales populares, domésticos y salvajes.',
     accent: '#22c55e',
     panel: 'from-emerald-500/20 via-lime-500/14 to-teal-500/10',
     emoji: '\u{1F43E}',
-    words: [...baseWords.animales, ...extraWordsByCategory.animales],
+    words: baseWords.animales,
   },
   lugares: {
     label: 'Lugares',
@@ -809,7 +808,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#38bdf8',
     panel: 'from-sky-500/20 via-cyan-500/14 to-indigo-500/10',
     emoji: '\u{1F5FA}',
-    words: [...baseWords.lugares, ...extraWordsByCategory.lugares],
+    words: baseWords.lugares,
   },
   comidas: {
     label: 'Comidas',
@@ -817,7 +816,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#f59e0b',
     panel: 'from-amber-500/20 via-orange-500/14 to-rose-500/10',
     emoji: '\u{1F355}',
-    words: [...baseWords.comidas, ...extraWordsByCategory.comidas],
+    words: baseWords.comidas,
   },
   profesiones: {
     label: 'Profesiones',
@@ -825,7 +824,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#a855f7',
     panel: 'from-fuchsia-500/20 via-violet-500/14 to-pink-500/10',
     emoji: '\u{1F9D1}\u200D\u{1F4BC}',
-    words: [...baseWords.profesiones, ...extraWordsByCategory.profesiones],
+    words: baseWords.profesiones,
   },
   objetos: {
     label: 'Objetos',
@@ -833,7 +832,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#fb7185',
     panel: 'from-rose-500/20 via-pink-500/14 to-fuchsia-500/10',
     emoji: '\u{1F9F1}',
-    words: [...baseWords.objetos, ...extraWordsByCategory.objetos],
+    words: baseWords.objetos,
   },
   peliculas_series: {
     label: 'Películas y series',
@@ -841,7 +840,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#f472b6',
     panel: 'from-pink-500/20 via-fuchsia-500/14 to-rose-500/10',
     emoji: '\u{1F3AC}',
-    words: [...baseWords.peliculas_series, ...extraWordsByCategory.peliculas_series],
+    words: baseWords.peliculas_series,
   },
   videojuegos: {
     label: 'Videojuegos',
@@ -849,7 +848,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#14b8a6',
     panel: 'from-teal-500/20 via-cyan-500/14 to-emerald-500/10',
     emoji: '\u{1F3AE}',
-    words: [...baseWords.videojuegos, ...extraWordsByCategory.videojuegos],
+    words: baseWords.videojuegos,
   },
   deportes: {
     label: 'Deportes',
@@ -857,7 +856,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#0ea5e9',
     panel: 'from-sky-500/20 via-cyan-500/14 to-blue-500/10',
     emoji: '\u{1F3DF}',
-    words: [...baseWords.deportes, ...extraWordsByCategory.deportes],
+    words: baseWords.deportes,
   },
   musica: {
     label: 'Música',
@@ -865,7 +864,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#8b5cf6',
     panel: 'from-violet-500/20 via-fuchsia-500/14 to-pink-500/10',
     emoji: '\u{1F3B5}',
-    words: [...baseWords.musica, ...extraWordsByCategory.musica],
+    words: baseWords.musica,
   },
   personajes_famosos: {
     label: 'Personajes famosos',
@@ -873,7 +872,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#f43f5e',
     panel: 'from-rose-500/20 via-pink-500/14 to-fuchsia-500/10',
     emoji: '\u{2B50}',
-    words: [...baseWords.personajes_famosos, ...extraWordsByCategory.personajes_famosos],
+    words: baseWords.personajes_famosos,
   },
   superheroes_villanos: {
     label: 'Superhéroes y villanos',
@@ -881,7 +880,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#22c55e',
     panel: 'from-emerald-500/20 via-lime-500/14 to-teal-500/10',
     emoji: '\u{1F9B8}',
-    words: [...baseWords.superheroes_villanos, ...extraWordsByCategory.superheroes_villanos],
+    words: baseWords.superheroes_villanos,
   },
   mitologia: {
     label: 'Mitología',
@@ -889,7 +888,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#f59e0b',
     panel: 'from-amber-500/20 via-orange-500/14 to-rose-500/10',
     emoji: '\u{26A1}',
-    words: [...baseWords.mitologia, ...extraWordsByCategory.mitologia],
+    words: baseWords.mitologia,
   },
   marcas_conocidas: {
     label: 'Marcas conocidas',
@@ -897,7 +896,7 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#38bdf8',
     panel: 'from-sky-500/20 via-cyan-500/14 to-indigo-500/10',
     emoji: '\u{1F3F7}',
-    words: [...baseWords.marcas_conocidas, ...extraWordsByCategory.marcas_conocidas],
+    words: baseWords.marcas_conocidas,
   },
   farandula_peruana: {
     label: 'Farándula peruana',
@@ -905,8 +904,33 @@ const categoryMeta: Record<ImpostorCategoryKey, ImpostorCategoryMeta> = {
     accent: '#fb7185',
     panel: 'from-rose-500/20 via-pink-500/14 to-fuchsia-500/10',
     emoji: '\u{1F1F5}\u{1F1EA}',
-    words: [...baseWords.farandula_peruana, ...extraWordsByCategory.farandula_peruana],
+    words: baseWords.farandula_peruana,
   },
+};
+
+const normalizeSecretName = (value: string) => value.trim().replace(/\s+/g, ' ');
+
+export const getImpostorCategoryWords = (
+  categoryKey: ImpostorCategoryKey,
+  participantNames: readonly string[] = [],
+): readonly ImpostorSecret[] => {
+  if (categoryKey !== 'entre_nosotros') {
+    return categoryMeta[categoryKey].words;
+  }
+
+  const uniqueNames = Array.from(
+    new Map(
+      participantNames
+        .map((name) => normalizeSecretName(name))
+        .filter((name) => name.length > 0)
+        .map((name) => [name.toLowerCase(), name] as const),
+    ).values(),
+  );
+
+  return uniqueNames.map((name) => ({
+    answer: name,
+    clue: 'alguien del grupo',
+  }));
 };
 
 export const impostorCategories = impostorCategoryOrder.map((key) => ({

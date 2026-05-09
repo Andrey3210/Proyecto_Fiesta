@@ -17,7 +17,7 @@ function FloatingBackButton({
   const showLabel = typeof label === 'string' && label.length > 0;
 
   return (
-    <div className="fixed left-3 top-3 z-50 sm:left-4 sm:top-4">
+    <div className="fixed left-3 top-12 z-50 sm:left-4 sm:top-14">
       <LiquidButton
         aria-label={ariaLabel}
         className={`rounded-full shadow-2xl ${

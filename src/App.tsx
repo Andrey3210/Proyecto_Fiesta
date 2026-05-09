@@ -367,7 +367,7 @@ function App() {
         onClick={handleBackNavigation}
       />
       {!isAppInstalled && (
-        <div className="fixed right-4 top-4 z-50">
+        <div className="fixed right-4 top-12 z-50 sm:top-14">
           <LiquidButton
             className="rounded-full !px-4 !py-3 shadow-2xl"
             onClick={handleInstallApp}

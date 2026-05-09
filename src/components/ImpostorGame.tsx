@@ -8,6 +8,7 @@ import { ParticipantAvatarBadge } from '@/components/ui/participant-avatar';
 import {
   impostorCategories,
   impostorCategoryMap,
+  getImpostorCategoryWords,
   type ImpostorCategoryKey,
   type ImpostorSecret,
 } from '@/data/impostor-categories';
@@ -68,6 +69,11 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   const resultPanelRef = useRef<HTMLDivElement | null>(null);
 
   const selectedCategory = selectedCategoryKey ? impostorCategoryMap[selectedCategoryKey] : null;
+  const participantNames = participants.map((participant) => participant.name);
+  const selectedCategoryWords = selectedCategoryKey
+    ? getImpostorCategoryWords(selectedCategoryKey, participantNames)
+    : [];
+  const shouldTruncateSecretAnswer = selectedCategoryKey === 'entre_nosotros';
   const currentPlayer = participants.find((p) => p.id === turnOrder[currentTurnIndex]);
   const impostorPlayer = impostorId ? participants.find((p) => p.id === impostorId) : null;
   const votedPlayer = votedPlayerId ? participants.find((p) => p.id === votedPlayerId) : null;
@@ -118,7 +124,8 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
     if (!category || participants.length < 3) return;
     const shuffled = shuffleList(participants.map((p) => p.id));
     const impostorIdx = Math.floor(Math.random() * shuffled.length);
-    const pickedSecret = category.words[Math.floor(Math.random() * category.words.length)];
+    const availableSecrets = getImpostorCategoryWords(category.key, participantNames);
+    const pickedSecret = availableSecrets[Math.floor(Math.random() * availableSecrets.length)];
     if (!pickedSecret) return;
     setTurnOrder(shuffled);
     setCurrentTurnIndex(0);
@@ -364,7 +371,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                       <span className="text-4xl">{selectedCategory.emoji}</span>
                       <div>
                         <p className="text-2xl font-semibold text-white sm:text-3xl">{selectedCategory.label}</p>
-                        <p className="text-sm text-white/55">{selectedCategory.words.length} palabras</p>
+                        <p className="text-sm text-white/55">{selectedCategoryWords.length} palabras</p>
                       </div>
                     </div>
                   ) : <p className="mt-3 text-sm text-white/50">Elige una categoría</p>}
@@ -484,9 +491,15 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                     </div>
                   ) : (
                     <div className="transition-all duration-500 transform scale-100">
-                      <p className={`text-4xl font-black tracking-[-0.05em] sm:text-5xl ${isCurrentImpostor ? 'animate-glitch' : 'animate-pulse'}`} style={{ color: isCurrentImpostor ? '#ff4444' : selectedColor }}>
-                        {isCurrentImpostor ? '¡ERES EL IMPOSTOR!' : secretItem.answer}
-                      </p>
+                      <div className="mx-auto flex w-full max-w-[18rem] justify-center px-2 sm:max-w-[22rem]">
+                        <p
+                          className={`w-full text-center text-3xl font-black leading-tight tracking-[-0.05em] sm:text-4xl ${isCurrentImpostor ? 'whitespace-normal break-words' : shouldTruncateSecretAnswer ? 'overflow-hidden whitespace-nowrap text-ellipsis' : 'break-words'} ${isCurrentImpostor ? 'animate-glitch' : 'animate-pulse'}`}
+                          style={{ color: isCurrentImpostor ? '#ff4444' : selectedColor }}
+                          title={secretItem.answer}
+                        >
+                          {isCurrentImpostor ? '¡ERES EL IMPOSTOR!' : secretItem.answer}
+                        </p>
+                      </div>
                       <p className="mt-2 text-sm text-white/55">{isCurrentImpostor ? 'siembra la discordia' : 'palabra prohibida'}</p>
                       {isCurrentImpostor && showHint && (
                         <div className="mt-4 inline-block rounded-2xl border border-amber-500/40 bg-black/70 p-3 animate-shimmer">
