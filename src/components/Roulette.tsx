@@ -86,7 +86,7 @@ function Roulette({ participants, onBackToHub, onButtonPress }: RouletteProps) {
   }, [selected]);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-transparent px-3 py-6 pt-16 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-24">
+    <div className="relative flex min-h-screen flex-col items-center justify-start bg-transparent px-3 py-6 pt-24 font-fiesta text-white app-fade-up sm:px-4 sm:py-10 sm:pt-28">
       <div className="w-full max-w-[92rem] overflow-hidden rounded-[2.25rem] border border-white/10 bg-slate-950/80 p-4 shadow-[0_40px_120px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-8">
         <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-500/18 via-sky-500/8 to-black/75" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.22),transparent_30%)]" />

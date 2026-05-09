@@ -419,7 +419,7 @@ function QuienEsMasProbable({ participants, onBackToHub, onButtonPress }: QuienE
 
   if (gameEnded) {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-transparent px-3 py-6 pt-16 font-fiesta text-white sm:px-4 sm:py-10 sm:pt-24">
+      <div className="relative flex min-h-screen flex-col items-center justify-start overflow-hidden bg-transparent px-3 py-6 pt-24 font-fiesta text-white sm:px-4 sm:py-10 sm:pt-28">
         <div className={rouletteShell} />
         <div className="pointer-events-none absolute inset-0" style={{ backgroundImage: rouletteBackground }} />
         <div className="pointer-events-none absolute left-5 top-10 h-40 w-40 rounded-full bg-emerald-400/10 blur-3xl" />
@@ -500,7 +500,7 @@ function QuienEsMasProbable({ participants, onBackToHub, onButtonPress }: QuienE
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-transparent px-3 py-6 pt-16 font-fiesta text-white sm:px-4 sm:py-10 sm:pt-24">
+    <div className="relative flex min-h-screen flex-col items-center justify-start overflow-hidden bg-transparent px-3 py-6 pt-24 font-fiesta text-white sm:px-4 sm:py-10 sm:pt-28">
       <div className={rouletteShell} />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_36%),linear-gradient(180deg,rgba(0,0,0,0.04),rgba(0,0,0,0.30))]" />
       <div className="pointer-events-none absolute left-10 top-14 h-72 w-72 rounded-full bg-emerald-300/10 blur-3xl" />

@@ -308,7 +308,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   // ---------- SETUP (selección de categoría) ----------
   if (phase === 'setup') {
     return (
-      <div className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-y-auto bg-transparent px-3 py-4 font-fiesta text-white"
+      <div className="relative flex min-h-[100svh] flex-col items-center justify-start overflow-y-auto bg-transparent px-3 pb-6 pt-24 font-fiesta text-white sm:pt-28"
         style={particleBackgroundStyle}>
         {particles.map(p => (
           <div
@@ -406,7 +406,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   if (phase === 'summary') {
     const resultTitle = voteResult === 'group-wins' ? '✨ INOCENTES GANAN ✨' : '💀 IMPOSTOR VENCE 💀';
     return (
-      <div className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-y-auto bg-transparent px-3 py-4 font-fiesta text-white"
+      <div className="relative flex min-h-[100svh] flex-col items-center justify-start overflow-y-auto bg-transparent px-3 pb-6 pt-24 font-fiesta text-white sm:pt-28"
         style={particleBackgroundStyle}>
         {particles.map(p => <div key={p.id} className="particle" style={{ left: p.left, width: p.size, height: p.size, background: p.color, animation: `floatParticle ${p.duration} infinite`, animationDelay: p.animationDelay }} />)}
         <div className="w-full max-w-5xl overflow-y-auto rounded-[2.5rem] border border-white/10 bg-black/60 p-4 backdrop-blur-2xl max-h-[95vh] sm:p-6">
@@ -461,7 +461,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   // ---------- REVEAL (con glitch y efecto brillo) ----------
   if (phase === 'reveal' && currentPlayer && secretItem) {
     return (
-      <div className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-y-auto bg-transparent px-3 py-4 font-fiesta text-white"
+      <div className="relative flex min-h-[100svh] flex-col items-center justify-start overflow-y-auto bg-transparent px-3 pb-6 pt-24 font-fiesta text-white sm:pt-28"
         style={particleBackgroundStyle}>
         {particles.map(p => <div key={p.id} className="particle" style={{ left: p.left, width: p.size, height: p.size, background: p.color, animation: `floatParticle ${p.duration} infinite`, animationDelay: p.animationDelay }} />)}
         <div className="w-full max-w-5xl">
@@ -596,7 +596,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
   // ---------- VOTE (con efecto foco y color del jugador) ----------
   if (phase === 'vote') {
     return (
-      <div className="relative flex h-screen flex-col items-center justify-center bg-transparent px-3 py-2 font-fiesta text-white overflow-hidden"
+      <div className="relative flex h-screen flex-col items-center justify-start bg-transparent px-3 pb-6 pt-24 font-fiesta text-white overflow-hidden sm:pt-28"
         style={particleBackgroundStyle}>
         {particles.map(p => <div key={p.id} className="particle" style={{ left: p.left, width: p.size, height: p.size, background: p.color, animation: `floatParticle ${p.duration} infinite`, animationDelay: p.animationDelay }} />)}
         <div className="w-full max-w-5xl">
