@@ -1,5 +1,5 @@
-import { FaClock, FaMask } from 'react-icons/fa';
 import type { MouseEvent as ReactMouseEvent } from 'react';
+import { FaMask, FaUsers } from 'react-icons/fa';
 
 import RadialOrbitalTimeline, {
   type TimelineItem,
@@ -7,7 +7,7 @@ import RadialOrbitalTimeline, {
 
 import type { Participant } from '../App';
 
-type GameMode = 'roulette' | 'truth' | 'reto' | 'impostor';
+type GameMode = 'roulette' | 'truth' | 'reto' | 'impostor' | 'quien' | 'yo';
 
 type GameHubProps = {
   participants: Participant[];
@@ -62,15 +62,26 @@ const timelineData: TimelineItem[] = [
     energy: 86,
   },
   {
-    id: 5,
-    title: 'Próximamente',
-    date: 'Muy pronto',
-    content: 'Tienes un comodín de 2 nuevos juegos porque no me alcanzó tiempo :(',
-    category: 'Próximamente',
-    icon: FaClock,
+    id: 6,
+    title: 'Quién es más probable',
+    date: 'Jugar ahora',
+    content: 'Voten en secreto y descubran al más probable del grupo.',
+    category: 'Quién es más probable',
+    icon: FaUsers,
     relatedIds: [1, 2, 3, 4],
-    status: 'pending',
-    energy: 65,
+    status: 'in-progress',
+    energy: 84,
+  },
+  {
+    id: 7,
+    title: 'Yo Nunca Nunca',
+    date: 'Jugar ahora',
+    content: 'Frases, tragos y confesiones rápidas.',
+    category: 'Yo Nunca Nunca',
+    icon: () => <span className="text-xl">🍷</span>,
+    relatedIds: [1, 2, 4, 6],
+    status: 'in-progress',
+    energy: 87,
   },
 ];
 
@@ -112,6 +123,14 @@ function GameHub({
 
           if (item.id === 4) {
             onSelectGame('reto');
+          }
+
+          if (item.id === 6) {
+            onSelectGame('quien');
+          }
+
+          if (item.id === 7) {
+            onSelectGame('yo');
           }
         }}
         onNodePress={onButtonPress}

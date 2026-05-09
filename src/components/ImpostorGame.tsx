@@ -325,7 +325,7 @@ function ImpostorGame({ participants, onBackToHub, onButtonPress }: ImpostorGame
                   <p className="text-[0.7rem] uppercase tracking-[0.45em] text-white/55">
                     MondeFan · Juego de máscaras
                   </p>
-                  <h1 className="mt-2 text-6xl font-black tracking-[-0.08em] text-white sm:text-8xl">
+                  <h1 className="mt-2 text-5xl font-black tracking-[-0.08em] text-white sm:text-5xl">
                     IMPOSTOR
                   </h1>
                 </div>

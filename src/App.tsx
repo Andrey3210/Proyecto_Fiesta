@@ -5,6 +5,8 @@ import GameHub from './components/GameHub';
 import ImpostorGame from './components/ImpostorGame';
 import Roulette from './components/Roulette';
 import WelcomeScreen from './components/WelcomeScreen';
+import QuienEsMasProbable from './components/QuienEsMasProbable';
+import YoNuncaNuncaGame from './components/YoNuncaNuncaGame';
 import TruthOrDareGame from './components/TruthOrDareGame';
 import TruthOrRetoGame from './components/TruthOrRetoGame';
 import FloatingBackButton from '@/components/ui/floating-back-button';
@@ -25,7 +27,7 @@ export type Participant = {
 };
 
 type Stage = 'welcome' | 'hub' | 'game';
-type GameMode = 'roulette' | 'truth' | 'reto' | 'impostor';
+type GameMode = 'roulette' | 'truth' | 'reto' | 'impostor' | 'quien' | 'yo';
 
 type ButtonPulse = {
   x: number;
@@ -199,6 +201,24 @@ function App() {
             rgbShift: 0.019,
             scanlineDensity: 1100,
             scanlineOpacity: 0.17,
+          }
+        : gameMode === 'quien'
+        ? {
+            baseColor: '#06B6D4',
+            speed: 1.08,
+            glitchIntensity: 0.62,
+            rgbShift: 0.021,
+            scanlineDensity: 1040,
+            scanlineOpacity: 0.18,
+          }
+        : gameMode === 'yo'
+        ? {
+            baseColor: '#FB7185',
+            speed: 1.06,
+            glitchIntensity: 0.6,
+            rgbShift: 0.02,
+            scanlineDensity: 1060,
+            scanlineOpacity: 0.18,
           }
         : {
             baseColor: '#f59e0b',
@@ -395,6 +415,22 @@ function App() {
               case 'reto':
                 return (
                   <TruthOrRetoGame
+                    participants={participants}
+                    onButtonPress={triggerButtonPulse}
+                    onBackToHub={() => setPendingExit('hub')}
+                  />
+                );
+              case 'quien':
+                return (
+                  <QuienEsMasProbable
+                    participants={participants}
+                    onButtonPress={triggerButtonPulse}
+                    onBackToHub={() => setPendingExit('hub')}
+                  />
+                );
+              case 'yo':
+                return (
+                  <YoNuncaNuncaGame
                     participants={participants}
                     onButtonPress={triggerButtonPulse}
                     onBackToHub={() => setPendingExit('hub')}
